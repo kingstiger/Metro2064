@@ -8,5 +8,6 @@ namespace MetronomySimul
 {
     class Kontener
     {
+        Array<Metronome> metronomy = new Array<Metronome>();
     }
 }

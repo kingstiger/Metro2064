@@ -6,7 +6,19 @@ using System.Threading.Tasks;
 
 namespace MetronomySimul
 {
-    class Class1
+    class Metronome
     {
+        double biezace_wychylenie;
+
+        public void Initialize(double biezace_wychylenie)
+        {
+            this.biezace_wychylenie = biezace_wychylenie;
+
+        }
+
+        public void Run()
+        {
+            
+        }
     }
 }
