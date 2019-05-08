@@ -1,0 +1,17 @@
+﻿╔═╗ ╔╗╔═══╗╔════╗     ╔═══╗╔═══╗╔═══╗╔════╗╔═══╗╔═══╗╔═══╗╔╗
+║║╚╗║║║╔══╝║╔╗╔╗║     ║╔═╗║║╔═╗║║╔═╗║║╔╗╔╗║║╔═╗║║╔═╗║║╔═╗║║║
+║╔╗╚╝║║╚══╗╚╝║║╚╝     ║╚═╝║║╚═╝║║║ ║║╚╝║║╚╝║║ ║║║║ ╚╝║║ ║║║║
+║║╚╗║║║╔══╝  ║║       ║╔══╝║╔╗╔╝║║ ║║  ║║  ║║ ║║║║ ╔╗║║ ║║║║ ╔╗
+║║ ║║║║╚══╗  ║║       ║║   ║║║╚╗║╚═╝║  ║║  ║╚═╝║║╚═╝║║╚═╝║║╚═╝║
+╚╝ ╚═╝╚═══╝  ╚╝       ╚╝   ╚╝╚═╝╚═══╝  ╚╝  ╚═══╝╚═══╝╚═══╝╚═══╝
+
+PROTOKÓŁ KOMUNIKACYJNY NET
+	Autorstwa:
+		Marcin Borysiewicz
+		Piotr Zieliński
+
+Spis treści:
+	1. Wprowadzenie do protokołu Net
+	2. Budowa komunikatu NetPacket
+	3. Operacje protokołu Net
+	4. Przykłady komunikacji z wykorzystaniem protokołu Net
