@@ -15,5 +15,9 @@ namespace MetronomySimul
 {
 	class Watchdog : NetInterface
 	{
+		public Watchdog() : base(0)
+		{
+
+		}
 	}
 }
