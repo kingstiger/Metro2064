@@ -15,3 +15,37 @@ Spis treści:
 	2. Budowa komunikatu NetPacket
 	3. Operacje protokołu Net
 	4. Przykłady komunikacji z wykorzystaniem protokołu Net
+
+------------------------------------------
+Rozdział 1 - Wprowadzenie do protokołu Net
+------------------------------------------
+
+Protokół Net jest prostym protokołem komunikacyjnym warstwy aplikacji, który umożliwia wymianę danych potrzebnych do przeprowadzenia symulacji.
+W warstwie transportowej aplikacji zastosowano protokół UDP, dzięki czemu sami mogliśmy zaimplementować mechanizm utrzymania połączenia i retransmisji.
+Każdy komunikat NetPacket wysłany przez nadawcę wymaga potwierdzenia przez odbiorcę otrzymania poprawnego komunikatu.
+Większość zadań protokołu realizują odpowiednio klasa NetInterface oraz klasa potomna Watchdog. Zasada działania obu tych klas jest bardzo podobna, jednakże
+każda z nich realizuje swoje zadania.
+
+Klasa NetInterface jest implementacją interfejsu sieciowego bazującego na protokole Net. Do jej zadań należy nawiązanie połączenia z inną instancją klasy
+NetInterface w aplikacji działającej na innym komputerze w sieci lokalnej, wymianie komunikatów NetPacket, przekazywanie ich do interpretacji przez inne
+moduły programu, oraz sprawdzanie poprawności i potwierdzenia odebrania komunikatów. Tylko jeden z interfejsów (instancja klasy NetInterface) z danego adresu IP
+może nawiązać połączenie z innym interfejsem znajdującym się na innym adresie IP (To znaczy: dwie aplikacje działające na dwóch komputerach w sieci lokalnej
+mogą nawiązać połączenie tylko poprzez jedną parę interfejsów). Każdy interfejs posiada dwa bufory na komunikaty NetPacket: Bufor pakietów oczekujących na wysłanie
+oraz bufor pakietów czekających na przetworzenie.
+
+Klasa Watchdog, będąca pochodną klasą NetInterface czuwa nad nawiązywaniem połączeń między pozostałymi interfejsami sieciowymi (instancjami klasy NetInterface) oraz
+ich utrzymaniem. Watchdog nasłuchuje na wszelkie komunikaty nowych metronomów w celu zaoferowania im połączenia z wolnym interfejsem sieciowym (jeżeli podczas
+działania aplikacji wszystkie nie są już połączone z innymi), oraz sam wysyła komunikaty zachęcające inne aplikacje do zaoferowania połączenia. Po zestawieniu
+połaczenia z inną aplikacją cyklicznie ją pinguje w celu sprawdzenia, czy jest ona aktywna w sieci. W przypadku gdy aplikacja, która ma już zestawione połączenie na
+poprzez interfejsy sieciowe nie odpowie w czasie na komunikat ping, interfejs sieciowy na którym było zestawione to połączenie zostanie o tym poinformowany
+co spowoduje jego zwolnienie i wyzerowanie buforów danych.
+
+Przykładowy przebieg komunikacji z użyciem protokołu Net i użyciem wyżej opisanych klas zostanie dokładniej opisany w rozdziale czwartym.
+
+----------------------------------------
+Rozdział 2 - Budowa komunikatu NetPacket
+----------------------------------------
+
+Komunikat NetPacket (zwany dalej po prostu pakietem) jest stosunkowo prosty w budowie i nie zawiera dużej ilości danych sterujących jak ma to miejsce np. w
+segmencie TCP czy pakiecie IP. Zawiera on pewną ilość nadmiarowych danych takich jak adres i port nadawcy/odbiorcy aby wyeliminować potrzebę wyciągania tych
+danych z PDU protokołów warstw niższych. Budowa pakietu prezentuje się następująco:
