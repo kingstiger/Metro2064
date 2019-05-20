@@ -28,17 +28,15 @@ każda z nich realizuje swoje zadania.
 
 Klasa NetInterface jest implementacją interfejsu sieciowego bazującego na protokole Net. Do jej zadań należy nawiązanie połączenia z inną instancją klasy
 NetInterface w aplikacji działającej na innym komputerze w sieci lokalnej, wymianie komunikatów NetPacket, przekazywanie ich do interpretacji przez inne
-moduły programu, oraz sprawdzanie poprawności i potwierdzenia odebrania komunikatów. Tylko jeden z interfejsów (instancja klasy NetInterface) z danego adresu IP
+moduły programu, oraz sprawdzanie poprawności i potwierdzenia odebrania komunikatów. NetInterface dzięki mechanizmom potwierdzania może sam przerwać połączenie
+z hostem który nie odpowiada. Tylko jeden z interfejsów (instancja klasy NetInterface) z danego adresu IP
 może nawiązać połączenie z innym interfejsem znajdującym się na innym adresie IP (To znaczy: dwie aplikacje działające na dwóch komputerach w sieci lokalnej
 mogą nawiązać połączenie tylko poprzez jedną parę interfejsów). Każdy interfejs posiada dwa bufory na komunikaty NetPacket: Bufor pakietów oczekujących na wysłanie
 oraz bufor pakietów czekających na przetworzenie.
 
 Klasa Watchdog, będąca pochodną klasą NetInterface czuwa nad nawiązywaniem połączeń między pozostałymi interfejsami sieciowymi (instancjami klasy NetInterface) oraz
 ich utrzymaniem. Watchdog nasłuchuje na wszelkie komunikaty nowych metronomów w celu zaoferowania im połączenia z wolnym interfejsem sieciowym (jeżeli podczas
-działania aplikacji wszystkie nie są już połączone z innymi), oraz sam wysyła komunikaty zachęcające inne aplikacje do zaoferowania połączenia. Po zestawieniu
-połaczenia z inną aplikacją cyklicznie ją pinguje w celu sprawdzenia, czy jest ona aktywna w sieci. W przypadku gdy aplikacja, która ma już zestawione połączenie na
-poprzez interfejsy sieciowe nie odpowie w czasie na komunikat ping, interfejs sieciowy na którym było zestawione to połączenie zostanie o tym poinformowany
-co spowoduje jego zwolnienie i wyzerowanie buforów danych.
+działania aplikacji wszystkie nie są już połączone z innymi), oraz sam wysyła komunikaty zachęcające inne aplikacje do zaoferowania połączenia. 
 
 Przykładowy przebieg komunikacji z użyciem protokołu Net i użyciem wyżej opisanych klas zostanie dokładniej opisany w rozdziale czwartym.
 

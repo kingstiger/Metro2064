@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
+using System.Net.Sockets;
+using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 
@@ -15,9 +15,9 @@ namespace MetronomySimul
 {
 	class Watchdog : NetInterface
 	{
-		public Watchdog() : base(0)
+		public Watchdog() : base()
 		{
-
-		}
+           
+        }
 	}
 }
