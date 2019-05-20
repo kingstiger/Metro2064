@@ -152,7 +152,7 @@ namespace MetronomySimul
 
 
         //Konwertuje wszystkie dane pakietu na jednen ciąg znaków
-        private string toOneStr()
+        private string ToOneStr()
         {
             string s = IptoStr(sender_IP) + '<' + IptoStr(receiver_IP) + '<'
                 + sender_port.ToString() + '<' + receiver_port.ToString() + '<'
@@ -174,9 +174,9 @@ namespace MetronomySimul
 
 
         //Konwertuje string zawierajacy wszystkie dane pakietu na tablicę bajtów (zmieniając przy okazji kodowanie na ASCII)
-        private byte[] toByte()
+        private byte[] ToByte()
         {
-            string s = this.toOneStr();
+            string s = this.ToOneStr();
             byte[] prep = Encoding.Unicode.GetBytes(s);
             byte[] p = Encoding.Convert(Encoding.Unicode, Encoding.ASCII, prep);
             return p;
@@ -234,7 +234,7 @@ namespace MetronomySimul
 
         public byte[] TranslateMsgToSend()
         {
-            byte[] packet = this.toByte();
+            byte[] packet = this.ToByte();
             return packet;
         }
 	}
