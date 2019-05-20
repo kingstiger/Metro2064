@@ -12,19 +12,22 @@ namespace MetronomySimul
 {
 	class NetInterface
 	{
-		protected UdpClient client;                                           //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
+		protected UdpClient netClient;                                           //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
 		protected IPEndPoint localEndPoint, targetEndPoint;                   //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
 		protected Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
-		private bool isAvailable { get; set; }                                //Oznacza, czy interfejs nie ma już połączenia
+        protected Mutex sendMutex, receiveMutex;                              //Muteksy dla kolejek komnikatów
+        private bool isAvailable { get; set; }                                //Oznacza, czy interfejs nie ma już połączenia
 		protected Thread senderThread, listenerThread, processingThread;	  //Uchwyty na wątki
-
+        
         /// <summary>
         /// Tworzy nowy inerfejs sieciowy o numerze zgodnym z interfaceNumber
         /// </summary>
         /// <param name="interfaceNumber"></param>
 		public NetInterface(int interfaceNumber)                              //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
 		{
-			isAvailable = true;
+            sendMutex = new Mutex();
+            receiveMutex = new Mutex();
+            isAvailable = true;
 			packetsToSend = new Queue<NetPacket>();                           //Inicjalizacja buforów na komunikaty
 			packetsReceived = new Queue<NetPacket>();
 			senderThread = new Thread(new ThreadStart(SenderThread));
@@ -32,7 +35,7 @@ namespace MetronomySimul
 			processingThread = new Thread(new ThreadStart(ProcessingThread));
 
 			localEndPoint = new IPEndPoint(IPAddress.Any, GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
-			client = new UdpClient(localEndPoint);												//Inicjalizacja klienta protokołu UDP
+			netClient = new UdpClient(localEndPoint);												//Inicjalizacja klienta protokołu UDP
 		}
 
         /// <summary>
@@ -40,6 +43,8 @@ namespace MetronomySimul
         /// </summary>
         protected NetInterface()
         {
+            sendMutex = new Mutex();
+            receiveMutex = new Mutex();
             packetsToSend = new Queue<NetPacket>();                           //Inicjalizacja buforów na komunikaty
             packetsReceived = new Queue<NetPacket>();
             senderThread = new Thread(new ThreadStart(SenderThread));
@@ -47,19 +52,29 @@ namespace MetronomySimul
             processingThread = new Thread(new ThreadStart(ProcessingThread));
 
             localEndPoint = new IPEndPoint(IPAddress.Any, GetPortNumber(0));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
-            client = new UdpClient(localEndPoint);
+            netClient = new UdpClient(localEndPoint);
         }
 
-        virtual protected void ListenerThread()   //Wątek odbierający komunikaty z sieci
+        /// <summary>
+        /// Wątek odbierający komunikaty z sieci
+        /// </summary>
+        virtual protected void ListenerThread()
 		{
+            byte[] receivedBytes;
+            NetPacket receivedPacket;
+
 			while(true)
 			{
-				//odbieranie pakietu
+                receivedBytes = netClient.Receive(ref targetEndPoint);
+                receivedPacket = .ReadReceivedMsg(receivedBytes);
 				//dodanie go do kolejki pakietów odebranych
 			}
 		}
 
-        virtual protected void SenderThread()     //Wątek wysyłający komunikaty w sieć
+        /// <summary>
+        /// Wątek wysyłający komunikaty w sieć 
+        /// </summary>
+        virtual protected void SenderThread()     
 		{
 			while(true)
 			{
@@ -70,9 +85,60 @@ namespace MetronomySimul
 			}
 		}
 
-        protected void ProcessingThread()         //Przetwarzanie pakietów, ahhhhhhh to bdzie duże
+        /// <summary>
+        /// Wątek przetwarzający odebrane pakiety
+        /// </summary>
+        protected void ProcessingThread()
         {
             return;
+        }
+
+        /// <summary>
+        /// Zwraca pierwszy pakiet w kolejce pakietów odebranych
+        /// </summary>
+        /// <returns></returns>
+        protected NetPacket GetReceivedPacket()
+        {
+            receiveMutex.WaitOne();
+            NetPacket temp = packetsReceived.Dequeue();
+            receiveMutex.ReleaseMutex();
+
+            return temp;
+        }
+
+        /// <summary>
+        /// Dodaje nowy pakiet do kolejki pakietów odebranych
+        /// </summary>
+        /// <param name="newPacket"></param>
+        protected void AddReceivedPacket(NetPacket newPacket)
+        {
+            receiveMutex.WaitOne();
+            packetsReceived.Enqueue(newPacket);
+            receiveMutex.ReleaseMutex();
+        }
+
+        /// <summary>
+        /// Zwraca pierwszy pakiet w kolejce pakietów do wysłania
+        /// </summary>
+        /// <returns></returns>
+        protected NetPacket GetAwaitingToSendPacket()
+        {
+            sendMutex.WaitOne();
+            NetPacket temp = packetsToSend.Dequeue();
+            sendMutex.ReleaseMutex();
+
+            return temp;
+        }
+
+        /// <summary>
+        /// Dodaje nowy pakiet do kolejki pakietów oczekujących na wysłanie
+        /// </summary>
+        /// <param name="newPacket"></param>
+        protected void AddAwaitingToSendPacket(NetPacket newPacket)
+        {
+            sendMutex.WaitOne();
+            packetsToSend.Enqueue(newPacket);
+            sendMutex.ReleaseMutex();
         }
 
         virtual public int GetPortNumber(int interfaceNumber) => 8080 + interfaceNumber;
