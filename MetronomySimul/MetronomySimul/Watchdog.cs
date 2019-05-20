@@ -15,9 +15,16 @@ namespace MetronomySimul
 {
 	class Watchdog : NetInterface
 	{
-		public Watchdog() : base()
+        private List<NetInterface> interfaces;
+
+		public Watchdog(int amount_of_interfaces) : base()
 		{
-           
+           for (int i = 0; i < amount_of_interfaces; i++)
+           {
+                interfaces.Add(new NetInterface(i));
+           }
         }
+
+
 	}
 }
