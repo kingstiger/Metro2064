@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Operations.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="OscillatorUpdator.cs" />
     <Compile Include="Form1.cs">

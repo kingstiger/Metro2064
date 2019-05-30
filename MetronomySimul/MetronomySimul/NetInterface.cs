@@ -18,13 +18,14 @@ namespace MetronomySimul
         protected Mutex sendMutex, receiveMutex;                              //Muteksy dla kolejek komnikatów
         private bool isAvailable { get; set; }                                //Oznacza, czy interfejs nie ma już połączenia
 		protected Thread senderThread, listenerThread, processingThread;	  //Uchwyty na wątki
-        
+        private int seq_number;
         /// <summary>
         /// Tworzy nowy inerfejs sieciowy o numerze zgodnym z interfaceNumber
         /// </summary>
         /// <param name="interfaceNumber"></param>
 		public NetInterface(int interfaceNumber)                              //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
 		{
+            seq_number = 0;
             sendMutex = new Mutex();
             receiveMutex = new Mutex();
             isAvailable = true;
@@ -43,6 +44,7 @@ namespace MetronomySimul
         /// </summary>
         protected NetInterface()
         {
+            seq_number = 0;
             sendMutex = new Mutex();
             receiveMutex = new Mutex();
             packetsToSend = new Queue<NetPacket>();                           //Inicjalizacja buforów na komunikaty
@@ -61,12 +63,12 @@ namespace MetronomySimul
         virtual protected void ListenerThread()
 		{
             byte[] receivedBytes;
-            NetPacket receivedPacket;
+            NetPacket receivedPacket = new NetPacket();
 
 			while(true)
 			{
                 receivedBytes = netClient.Receive(ref targetEndPoint);
-                receivedPacket = .ReadReceivedMsg(receivedBytes);
+                receivedPacket.ReadReceivedMsg(receivedBytes);
 				//dodanie go do kolejki pakietów odebranych
 			}
 		}
@@ -90,8 +92,38 @@ namespace MetronomySimul
         /// </summary>
         protected void ProcessingThread()
         {
-            return;
+            while(true)
+            {
+                //jak są jakieś otrzymane pakiety to je przetwarza
+                if(packetsReceived.Count > 0)
+                {
+                    NetPacket toProcess = GetReceivedPacket();
+                    
+                }
+
+                //jak są jakieś informacje do wysłania, to je wsadza do kolejki do wysłania
+                if(OscillatorUpdator.oscillation_info_domestic.Count > 0)
+                {
+                    System.Tuple<double, double> oscilation_info = OscillatorUpdator.GetOscInfoDomestic();
+                    AddAwaitingToSendPacket(SyncPacket(oscilation_info)); //tu nie jestem pewien co z nr sekwencyjnym
+
+                }
+            }
         }
+
+        /// <summary>
+        /// Tworzenie pakietu do synchronizacji z powiązanym na danym interfejsie metronomem
+        /// </summary>
+        /// <param name="oscilation_info"></param>
+        /// <returns></returns>
+        private NetPacket SyncPacket(System.Tuple<double, double> oscilation_info)
+        {
+            NetPacket sync = new NetPacket(
+                        localEndPoint.Address, targetEndPoint.Address, localEndPoint.Port, targetEndPoint.Port,
+                        seq_number, Operations.SYNC, oscilation_info.Item1.ToString() + ";" + oscilation_info.Item2.ToString());
+            return sync;
+        }
+
 
         /// <summary>
         /// Zwraca pierwszy pakiet w kolejce pakietów odebranych
@@ -161,13 +193,15 @@ namespace MetronomySimul
 
 		public void TerminateConnection()
 		{
-			//Wyłączenie wątków
-			senderThread.Suspend();
-			listenerThread.Suspend();
+            //Wyłączenie wątków
+#pragma warning disable CS0618 // Type or member is obsolete
+            senderThread.Suspend();
+            listenerThread.Suspend();
             processingThread.Suspend();
+#pragma warning restore CS0618 // Type or member is obsolete
 
-			//Czyszczenie pól
-			packetsToSend.Clear();
+            //Czyszczenie pól
+            packetsToSend.Clear();
 			packetsReceived.Clear();
 			targetEndPoint = null;
 

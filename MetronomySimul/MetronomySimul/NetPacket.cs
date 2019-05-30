@@ -62,6 +62,22 @@ namespace MetronomySimul
             //TODO: data = nic?
         }
 
+
+        /// <summary>
+        /// Pusty pakiet
+        /// </summary>
+        public NetPacket()
+        {
+            sender_IP = null;
+            sender_port = 0;
+            receiver_port = 0;
+            receiver_IP = null;
+            seq_number = 0;
+            operation = "";
+            data = "";
+        }
+
+
         /// <summary>
         /// Dla odpowiedzi z jakimis danymi (nr sekwencyjny pozostaje taki sam)
         /// </summary>

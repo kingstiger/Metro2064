@@ -24,7 +24,6 @@ namespace MetronomySimul
                 interfaces.Add(new NetInterface(i));
            }
         }
-
-
+        
 	}
 }

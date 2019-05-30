@@ -35,6 +35,8 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.label1 = new System.Windows.Forms.Label();
+            this.textBox1 = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.SuspendLayout();
@@ -52,6 +54,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.textBox1);
+            this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.progressBar2);
             this.tabPage1.Controls.Add(this.progressBar1);
             this.tabPage1.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -65,7 +69,7 @@
             // 
             // progressBar2
             // 
-            this.progressBar2.Location = new System.Drawing.Point(405, 197);
+            this.progressBar2.Location = new System.Drawing.Point(338, 197);
             this.progressBar2.Name = "progressBar2";
             this.progressBar2.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
             this.progressBar2.RightToLeftLayout = true;
@@ -74,7 +78,7 @@
             // 
             // progressBar1
             // 
-            this.progressBar1.Location = new System.Drawing.Point(556, 197);
+            this.progressBar1.Location = new System.Drawing.Point(482, 197);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.Size = new System.Drawing.Size(145, 23);
             this.progressBar1.TabIndex = 0;
@@ -109,6 +113,22 @@
             this.splitter1.TabIndex = 1;
             this.splitter1.TabStop = false;
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(434, 223);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(102, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Wartość wychylenia";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(398, 240);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(169, 20);
+            this.textBox1.TabIndex = 3;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -121,6 +141,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -134,5 +155,7 @@
         private System.Windows.Forms.Splitter splitter1;
         public System.Windows.Forms.ProgressBar progressBar2;
         public System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label1;
     }
 }
