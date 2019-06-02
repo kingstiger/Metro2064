@@ -82,6 +82,8 @@ namespace MetronomySimul
 			{
 				if(packetsToSend.Count > 0)
 				{
+                    byte[] bytesToSend = NetPacket.TranslateMsgToSend(GetAwaitingToSendPacket());
+                    
 					//Wyślij pakiet z kolejki
 				}
 			}
@@ -98,7 +100,10 @@ namespace MetronomySimul
                 if(packetsReceived.Count > 0)
                 {
                     NetPacket toProcess = GetReceivedPacket();
-                    
+                    if(toProcess.operation == Operations.SYNC)
+                    {
+                        OscillatorUpdator.GiveOscInfoForeign(NetPacket.ReadOscInfoFromData(toProcess.data));
+                    }
                 }
 
                 //jak są jakieś informacje do wysłania, to je wsadza do kolejki do wysłania
@@ -110,6 +115,12 @@ namespace MetronomySimul
                 }
             }
         }
+
+
+
+        
+
+
 
         /// <summary>
         /// Tworzenie pakietu do synchronizacji z powiązanym na danym interfejsie metronomem

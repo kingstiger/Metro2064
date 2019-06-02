@@ -63,6 +63,24 @@ namespace MetronomySimul
         }
 
 
+
+        /// <summary>
+        /// Z pakietu "wyciąga" informacje o oscylacji
+        /// </summary>
+        /// <param name="data"></param>
+        /// <returns></returns>
+        static public Tuple<double, double> ReadOscInfoFromData(string data)
+        {
+            string wychylenie = "", czestotliwosc = "";
+            Tuple<double, double> Osc;
+            for (int i = 0; data[i] != ';'; i++)
+                wychylenie += data[i];
+            for (int i = 0; data[i] != ';'; i++)
+                czestotliwosc += data[i];
+            Osc = new Tuple<double, double>(double.Parse(wychylenie), double.Parse(czestotliwosc));
+            return Osc;
+        }
+
         /// <summary>
         /// Pusty pakiet
         /// </summary>
@@ -248,9 +266,9 @@ namespace MetronomySimul
             }
         }
 
-        public byte[] TranslateMsgToSend()
+        static public byte[] TranslateMsgToSend(NetPacket p)
         {
-            byte[] packet = this.ToByte();
+            byte[] packet = p.ToByte();
             return packet;
         }
 	}
