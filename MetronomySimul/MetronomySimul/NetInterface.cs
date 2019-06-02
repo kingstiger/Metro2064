@@ -12,7 +12,7 @@ namespace MetronomySimul
 {
 	class NetInterface
 	{
-		protected UdpClient netClient;                                           //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
+		protected UdpClient netClient;                                        //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
 		protected IPEndPoint localEndPoint, targetEndPoint;                   //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
 		protected Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
         protected Mutex sendMutex, receiveMutex;                              //Muteksy dla kolejek komnikatów
@@ -36,7 +36,7 @@ namespace MetronomySimul
 			processingThread = new Thread(new ThreadStart(ProcessingThread));
 
 			localEndPoint = new IPEndPoint(IPAddress.Any, GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
-			netClient = new UdpClient(localEndPoint);												//Inicjalizacja klienta protokołu UDP
+			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
 		}
 
         /// <summary>
@@ -57,7 +57,7 @@ namespace MetronomySimul
             netClient = new UdpClient(localEndPoint);
         }
 
-        /// <summary>
+        /// <summary> 
         /// Wątek odbierający komunikaty z sieci
         /// </summary>
         virtual protected void ListenerThread()
@@ -69,30 +69,29 @@ namespace MetronomySimul
 			{
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-				//dodanie go do kolejki pakietów odebranych
+				AddReceivedPacket(receivedPacket);
 			}
 		}
 
-        /// <summary>
-        /// Wątek wysyłający komunikaty w sieć 
-        /// </summary>
-        virtual protected void SenderThread()     
+		/// <summary>
+		/// Wątek wysyłający komunikaty w sieć 
+		/// </summary>
+		virtual protected void SenderThread()     
 		{
 			while(true)
 			{
 				if(packetsToSend.Count > 0)
 				{
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(GetAwaitingToSendPacket());
-                    
-					//Wyślij pakiet z kolejki
+					netClient.Send(bytesToSend, bytesToSend.Length);
 				}
 			}
 		}
 
-        /// <summary>
-        /// Wątek przetwarzający odebrane pakiety
-        /// </summary>
-        protected void ProcessingThread()
+		/// <summary>
+		/// Wątek przetwarzający odebrane pakiety
+		/// </summary>
+		protected void ProcessingThread()
         {
             while(true)
             {
@@ -100,11 +99,48 @@ namespace MetronomySimul
                 if(packetsReceived.Count > 0)
                 {
                     NetPacket toProcess = GetReceivedPacket();
+
+
                     if(toProcess.operation == Operations.SYNC)
                     {
                         OscillatorUpdator.GiveOscInfoForeign(NetPacket.ReadOscInfoFromData(toProcess.data));
                     }
-                }
+
+					if (toProcess.operation == Operations.DISCOVER)
+					{
+						
+					}
+
+					if (toProcess.operation == Operations.OFFER)
+					{
+						
+					}
+
+					if (toProcess.operation == Operations.PING)
+					{
+						
+					}
+
+					if (toProcess.operation == Operations.ERROR)
+					{
+
+					}
+
+					if (toProcess.operation == Operations.ACK)
+					{
+
+					}
+
+					if (toProcess.operation == Operations.NACK)
+					{
+
+					}
+
+					if (toProcess.operation == Operations.SYNC)
+					{
+
+					}
+				}
 
                 //jak są jakieś informacje do wysłania, to je wsadza do kolejki do wysłania
                 if(OscillatorUpdator.oscillation_info_domestic.Count > 0)
@@ -116,12 +152,7 @@ namespace MetronomySimul
             }
         }
 
-
-
-        
-
-
-
+		
         /// <summary>
         /// Tworzenie pakietu do synchronizacji z powiązanym na danym interfejsie metronomem
         /// </summary>
