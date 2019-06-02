@@ -91,7 +91,7 @@ namespace MetronomySimul
 		/// <summary>
 		/// Wątek przetwarzający odebrane pakiety
 		/// </summary>
-		protected void ProcessingThread()
+		virtual protected void ProcessingThread()
         {
             while(true)
             {
@@ -106,19 +106,10 @@ namespace MetronomySimul
                         OscillatorUpdator.GiveOscInfoForeign(NetPacket.ReadOscInfoFromData(toProcess.data));
                     }
 
-					if (toProcess.operation == Operations.DISCOVER)
-					{
-						
-					}
-
-					if (toProcess.operation == Operations.OFFER)
-					{
-						
-					}
-
 					if (toProcess.operation == Operations.PING)
 					{
-						
+						NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK);
+						AddAwaitingToSendPacket(packetToSend);
 					}
 
 					if (toProcess.operation == Operations.ERROR)
@@ -132,11 +123,6 @@ namespace MetronomySimul
 					}
 
 					if (toProcess.operation == Operations.NACK)
-					{
-
-					}
-
-					if (toProcess.operation == Operations.SYNC)
 					{
 
 					}
