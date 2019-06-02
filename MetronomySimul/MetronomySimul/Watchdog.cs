@@ -16,8 +16,9 @@ namespace MetronomySimul
 	class Watchdog : NetInterface
 	{
         private List<NetInterface> interfaces;
+        private List<KeyValuePair<IPAddress, int>> offeredInterfaces;
 
-		public Watchdog(int amount_of_interfaces) : base()
+        public Watchdog(int amount_of_interfaces) : base()
 		{
            for (int i = 0; i < amount_of_interfaces; i++)
            {
@@ -36,25 +37,25 @@ namespace MetronomySimul
 
                     if (toProcess.operation == Operations.DISCOVER)
                     {
-                        
-                        foreach(NetInterface x in interfaces)
+
+                        foreach (NetInterface x in interfaces)
                         {
-                            if(x.IsAvailable())
+                            if (x.IsAvailable())
                             {
                                 NetPacket packetToSend = new NetPacket(toProcess, IPAddress.Any, (interfaces.IndexOf(x) + 1).ToString());
                                 AddAwaitingToSendPacket(packetToSend);
                                 break;
                             }
-                           
+
                         }
                     }
 
-                    if(toProcess.operation == Operations.OFFER)
+                    if (toProcess.operation == Operations.OFFER)
                     {
-                       
-                        foreach(NetInterface x in interfaces)
+
+                        foreach (NetInterface x in interfaces)
                         {
-                            if(x.IsAvailable())
+                            if (x.IsAvailable())
                             {
                                 x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(Int32.Parse(toProcess.data))));
                                 //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
@@ -76,14 +77,15 @@ namespace MetronomySimul
                         NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.PING);
                         AddAwaitingToSendPacket(packetToSend);
                     }
-                    
+
 
                     if (toProcess.operation == Operations.ACK)
                     {
-                        if(toProcess.data == Operations.PING)
+                        if (toProcess.data == Operations.PING)
                         {
                             //przestawiamy flagę oczekiwania na ACK po PINGU (go home, ur drunk)
-                        } else
+                        }
+                        else
                         {
                             //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
 
@@ -96,9 +98,38 @@ namespace MetronomySimul
                     }
                 }
 
-               
+
             }
-            
+        }
+            /// <summary>
+            /// Zwraca numer oferowanego interfejsu na podstawie adresu IP osoby potwierdzającej OFFER
+            /// </summary>
+            /// <param name="offerAcceptorAdress"></param>
+            /// <returns></returns>
+            private int GetOfferedInterfaceNumber(IPAddress offerAcceptorAdress)
+            {
+                foreach (KeyValuePair<IPAddress, int> x in offeredInterfaces)
+                {
+                    if (x.Key == offerAcceptorAdress)
+                    {
+                        offeredInterfaces.Remove(x);
+                        return x.Value;
+                    }
+                }
+
+                //W przypadku błędu
+                return -1;
+            }
+
+            /// <summary>
+            /// Dodaje parę adres oferenta i numer oferowanego interfejsu do listy zaoferowanych interfejsów
+            /// </summary>
+            /// <param name="bidderAddress">-> Adres oferenta interfejsu sieciowego</param>
+            /// <param name="offeredInterfaceNumber">-> Numer oferowanego interfejsu</param>
+            private void AddOfferedInterfaceNumber(IPAddress bidderAddress, int offeredInterfaceNumber)
+            {
+                offeredInterfaces.Add(new KeyValuePair<IPAddress, int>(bidderAddress, offeredInterfaceNumber));
+            }
         }
     }
-}
+
