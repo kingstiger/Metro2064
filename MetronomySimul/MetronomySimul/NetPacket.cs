@@ -45,7 +45,24 @@ namespace MetronomySimul
             operation = _operation;
             data = _data;
         }
-        
+
+        /// <summary>
+        /// Dla odpowiedzi na pakiet z komunikatem DISCOVER
+        /// </summary>
+        /// <param name="R"></param>
+        /// <param name="sender_ip">Adres lokalnego endpointa</param>
+        /// <param name="data">Tutaj idzie numer interfejsu, który jest oferowany</param>
+        public NetPacket(NetPacket R, IPAddress local_ip, string data)
+        {
+            sender_IP = local_ip;
+            sender_port = R.receiver_port;
+            receiver_IP = R.sender_IP;
+            receiver_port = R.sender_port;
+            seq_number = R.seq_number;
+            this.operation = Operations.OFFER;
+            this.data = data;
+        }
+
         /// <summary>
         /// Dla odpowiedzi w tej samej fazie - numer sekwencyjny pozostaje taki sam
         /// </summary>
