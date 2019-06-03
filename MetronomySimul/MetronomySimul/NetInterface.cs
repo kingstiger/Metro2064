@@ -13,7 +13,8 @@ namespace MetronomySimul
 	class NetInterface
 	{
 		protected UdpClient netClient;                                        //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
-		protected IPEndPoint localEndPoint, targetEndPoint;                   //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
+        protected IPEndPoint localEndPoint; 
+        private IPEndPoint targetEndPoint;                                      //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
 		protected Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
         protected Mutex sendMutex, receiveMutex;                              //Muteksy dla kolejek komnikatów
         private bool isAvailable { get; set; }                                //Oznacza, czy interfejs nie ma już połączenia
@@ -38,24 +39,6 @@ namespace MetronomySimul
 			localEndPoint = new IPEndPoint(IPAddress.Any, GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
 		}
-
-        /// <summary>
-        /// Tworzy nowy interfejs sieciowy z numerem 0. Użyj tylko w przypadku tworzenia instancji klasy Watchdog
-        /// </summary>
-        protected NetInterface()
-        {
-            seq_number = 0;
-            sendMutex = new Mutex();
-            receiveMutex = new Mutex();
-            packetsToSend = new Queue<NetPacket>();                           //Inicjalizacja buforów na komunikaty
-            packetsReceived = new Queue<NetPacket>();
-            senderThread = new Thread(new ThreadStart(SenderThread));
-            listenerThread = new Thread(new ThreadStart(ListenerThread));
-            processingThread = new Thread(new ThreadStart(ProcessingThread));
-
-            localEndPoint = new IPEndPoint(IPAddress.Any, GetPortNumber(0));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
-            netClient = new UdpClient(localEndPoint);
-        }
 
         /// <summary> 
         /// Wątek odbierający komunikaty z sieci
@@ -83,7 +66,7 @@ namespace MetronomySimul
 				if(packetsToSend.Count > 0)
 				{
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(GetAwaitingToSendPacket());
-					netClient.Send(bytesToSend, bytesToSend.Length);
+					netClient.Send(bytesToSend, bytesToSend.Length, targetEndPoint);
 				}
 			}
 		}
@@ -132,7 +115,7 @@ namespace MetronomySimul
                 if(OscillatorUpdator.oscillation_info_domestic.Count > 0)
                 {
                     System.Tuple<double, double> oscilation_info = OscillatorUpdator.GetOscInfoDomestic();
-                    AddAwaitingToSendPacket(SyncPacket(oscilation_info)); //tu nie jestem pewien co z nr sekwencyjnym
+                    AddAwaitingToSendPacket(MakeSyncPacket(oscilation_info)); //tu nie jestem pewien co z nr sekwencyjnym
 
                 }
             }
@@ -144,7 +127,7 @@ namespace MetronomySimul
         /// </summary>
         /// <param name="oscilation_info"></param>
         /// <returns></returns>
-        private NetPacket SyncPacket(System.Tuple<double, double> oscilation_info)
+        private NetPacket MakeSyncPacket(System.Tuple<double, double> oscilation_info)
         {
             NetPacket sync = new NetPacket(
                         localEndPoint.Address, targetEndPoint.Address, localEndPoint.Port, targetEndPoint.Port,
@@ -201,7 +184,9 @@ namespace MetronomySimul
             sendMutex.ReleaseMutex();
         }
 
-        virtual public int GetPortNumber(int interfaceNumber) => 8080 + interfaceNumber;
+        public int GetPortNumber(int interfaceNumber) => 8080 + interfaceNumber;
+
+        public int GetInterfaceNumber() => this.localEndPoint.Port - 8080;
 
         public bool IsAvailable() => this.isAvailable;
 

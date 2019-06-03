@@ -47,7 +47,7 @@ namespace MetronomySimul
         }
 
         /// <summary>
-        /// Dla odpowiedzi na pakiet z komunikatem DISCOVER
+        /// Dla odpowiedzi na pakiet z komunikatem DISCOVER, tworzy komunikat OFFER
         /// </summary>
         /// <param name="R"></param>
         /// <param name="sender_ip">Adres lokalnego endpointa</param>
@@ -111,7 +111,6 @@ namespace MetronomySimul
             operation = "";
             data = "";
         }
-
 
         /// <summary>
         /// Dla odpowiedzi z jakimis danymi (nr sekwencyjny pozostaje taki sam)
