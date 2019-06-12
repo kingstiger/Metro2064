@@ -19,7 +19,7 @@ namespace MetronomySimul
         private double wychylenie, frequency = 0; //wychylenie <-1, 1>, czestotliwosc (0Hz, 1Hz>
         private int kierunek; //kierunek {-1, 1}
         private Thread thread;
-
+        private string[] connectionsConsole = new string[4];
         public Form1()
         {
             Random r = new Random();
@@ -33,8 +33,54 @@ namespace MetronomySimul
             else kierunek = -1;
 
             watchdog = new Watchdog(4); //Tu zmieniaj ilosc interfejsow (domyslnie 4)
+            
             thread = new Thread(PendulumThread);
+            thread.Start();
+            new Thread(ConnectionsThread).Start();           
             InitializeComponent();
+        }
+
+        private void ConnectionsThread()
+        {
+            while(true)
+            {
+                bool _modified = true;
+                int number_of_interfaces_connected = 0;
+                if(_modified)
+                {
+                    number_of_interfaces_connected = 0;
+                    Invoke
+                            (new Action(() =>
+                            {
+                                activeConnections.Text += "";
+                            }));
+                    foreach (NetPacket x in watchdog.connectedInterfaces)
+                    {
+                        connectionsConsole[watchdog.connectedInterfaces.IndexOf(x)] = $"IP Adrress: {x.receiver_IP}; Port: {x.receiver_port}; Time since last PING: {watchdog.seconds_elapsed_since_last_pings}";
+                        number_of_interfaces_connected++;
+                    }
+                    for (int i = 0; i < connectionsConsole.Length; i++)
+                    {
+                        if (connectionsConsole[i] != "")
+
+                            Invoke
+                            (new Action(() =>
+                            {
+                                activeConnections.Text += connectionsConsole[i];
+                            }));
+                        else
+                            Invoke
+                            (new Action(() =>
+                            {
+                                activeConnections.Text += "Niepołączony";
+                            }));
+
+                    }
+                    _modified = false;
+                }
+                if (watchdog.connectedInterfaces.Count != number_of_interfaces_connected)
+                    _modified = true;
+            }
         }
 
         private void PendulumThread()

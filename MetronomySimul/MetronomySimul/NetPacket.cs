@@ -79,7 +79,20 @@ namespace MetronomySimul
             //TODO: data = nic?
         }
 
-
+        /// <summary>
+        /// Dla kopiowania pakietu
+        /// </summary>
+        /// <param name="R"></param>
+        public NetPacket(NetPacket R)
+        {
+            sender_IP = R.receiver_IP;
+            sender_port = R.receiver_port;
+            receiver_IP = R.sender_IP;
+            receiver_port = R.sender_port;
+            seq_number = R.seq_number;
+            operation = R.operation;
+            //TODO: data = nic?
+        }
 
         /// <summary>
         /// Z pakietu "wyciąga" informacje o oscylacji

@@ -17,10 +17,11 @@ namespace MetronomySimul
 	{
         private List<NetInterface> interfaces;
         private List<int> offeredInterfacesNumbers;   //Lista interfejsów zaoferowanych do innych metronomów. Para IPAddress oferenta oraz numer naszego interfejsu
-
+        public List<NetPacket> connectedInterfaces = new List<NetPacket>(); //Gotowe do wysłania NetPacket-y (do wstawienia PING albo DISCOVER)
         private IPEndPoint multicastReceivingEndpoint;
         private Mutex offeredMutex;
-
+        public int seconds_elapsed_since_last_pings;
+        
         public Watchdog(int amount_of_interfaces) : base(0)
 		{
             multicastReceivingEndpoint = new IPEndPoint(IPAddress.Any, GetPortNumber(0));
@@ -34,6 +35,49 @@ namespace MetronomySimul
            }
             netClient.Client.EnableBroadcast = true;
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
+        }
+
+        //cyklicznie wysyła PING oraz DISCOVER
+        private void Cyclic()
+        {
+
+            seconds_elapsed_since_last_pings = 0;
+            while (true)
+            {
+                if (seconds_elapsed_since_last_pings > 10)
+                {
+                    NetPacket cyclic;
+                    if (connectedInterfaces.Count > 0)
+                    {
+                        foreach (NetInterface x in interfaces)
+                        {
+                            if (!x.IsAvailable())
+                            {
+                                foreach (NetPacket y in connectedInterfaces)
+                                {
+                                    if (y.data == $"{interfaces.IndexOf(x) + 1}")
+                                    {
+                                        cyclic = new NetPacket(y);
+                                        cyclic.data = "";
+                                        cyclic.operation = Operations.PING;
+                                        AddAwaitingToSendPacket(cyclic);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        cyclic = MakeDiscoverPacket();
+                        AddAwaitingToSendPacket(cyclic);
+                    }
+                    seconds_elapsed_since_last_pings = 0;
+                } else
+                {
+                    seconds_elapsed_since_last_pings++;
+                    Thread.Sleep(1000);
+                }
+            }
         }
 
         protected override void ProcessingThread()
@@ -70,6 +114,7 @@ namespace MetronomySimul
                             if (x.IsAvailable() && !offeredInterfacesNumbers.Contains(x.GetInterfaceNumber()))
                             {
                                 x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(Int32.Parse(toProcess.data))));
+                                connectedInterfaces.Add(new NetPacket(toProcess, $"{interfaces.IndexOf(x) + 1}"));
                                 //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
                                 NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
                                 AddAwaitingToSendPacket(packetToSend);
@@ -96,7 +141,7 @@ namespace MetronomySimul
                         else
                         {
                             //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
-
+                            
                         }
                     }
 
@@ -105,8 +150,7 @@ namespace MetronomySimul
 
                     }
                 }
-
-
+                
             }
         }
 

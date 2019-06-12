@@ -30,15 +30,17 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
             this.progressBar2 = new System.Windows.Forms.ProgressBar();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.label1 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.activeConnections = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -67,6 +69,22 @@
             this.tabPage1.Text = "Parametry symulacji";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(398, 240);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(169, 20);
+            this.textBox1.TabIndex = 3;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(434, 223);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(102, 13);
+            this.label1.TabIndex = 2;
+            this.label1.Text = "Wartość wychylenia";
+            // 
             // progressBar2
             // 
             this.progressBar2.Location = new System.Drawing.Point(338, 197);
@@ -85,6 +103,7 @@
             // 
             // tabPage2
             // 
+            this.tabPage2.Controls.Add(this.activeConnections);
             this.tabPage2.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
@@ -113,21 +132,14 @@
             this.splitter1.TabIndex = 1;
             this.splitter1.TabStop = false;
             // 
-            // label1
+            // activeConnections
             // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(434, 223);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(102, 13);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Wartość wychylenia";
-            // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(398, 240);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(169, 20);
-            this.textBox1.TabIndex = 3;
+            this.activeConnections.Location = new System.Drawing.Point(144, 108);
+            this.activeConnections.Multiline = true;
+            this.activeConnections.Name = "activeConnections";
+            this.activeConnections.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.activeConnections.Size = new System.Drawing.Size(630, 269);
+            this.activeConnections.TabIndex = 0;
             // 
             // Form1
             // 
@@ -142,6 +154,8 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -157,5 +171,6 @@
         public System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox activeConnections;
     }
 }

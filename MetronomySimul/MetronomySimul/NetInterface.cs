@@ -109,6 +109,7 @@ namespace MetronomySimul
 					{
 
 					}
+                    
 				}
 
                 //jak są jakieś informacje do wysłania, to je wsadza do kolejki do wysłania
