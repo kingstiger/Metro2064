@@ -257,11 +257,12 @@ namespace MetronomySimul
         public void ReadReceivedMsg(byte[] received_msg)
         {
             string msg = ByteToStr(received_msg);
+            
             int i;
 
             //read IPs, ports, eq number
             {
-                string sendIP = "", recIP = "", sqnumber = "", sendPort = "", recPort = "";
+                string sendIP = "", recIP = "", sqnumber = "", sendPort = "", recPort = "", operation = "";
                 for (i = 0; msg[i] != '<'; i++)
                 {
                     sendIP += msg[i];
@@ -274,17 +275,17 @@ namespace MetronomySimul
                 i++;
                 for (; msg[i] != '<'; i++)
                 {
-                    sender_port += msg[i]
+                    sendPort += msg[i];
                 }
                 i++;
                 for (; msg[i] != '<'; i++)
                 {
-                    receiver_port += msg[i];
+                    recPort += msg[i];
                 }
                 i++;
                 for (; msg[i] != '<'; i++)
                 {
-                    seq_number += msg[i];
+                    sqnumber += msg[i];
                 }
                 sender_IP = IPAddress.Parse(sendIP);
                 receiver_IP = IPAddress.Parse(recIP);
@@ -292,19 +293,19 @@ namespace MetronomySimul
                 receiver_port = Int32.Parse(recPort);
                 seq_number = Int32.Parse(sqnumber);
             }
-            
+
             //read Operation
-            
-            for (i = 25; msg[i] != '<'; i++)
+            i++;
+            for (; msg[i] != '<'; i++)
             {
                 operation += msg[i];
             }
-
+            i++;
             //read data (if any)
 
-            if(received_msg.Count() > 19)
+            if(received_msg.Count() > i)
             {
-                for (i++; i < msg.Count(); i++)
+                for (; i < msg.Count(); i++)
                 {
                     data += msg[i];
                 }

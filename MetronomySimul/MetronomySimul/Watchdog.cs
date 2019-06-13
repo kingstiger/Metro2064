@@ -95,7 +95,6 @@ namespace MetronomySimul
                     //Na pakiet DISCOVER odpowiadamy OFFER
                     if (toProcess.operation == Operations.DISCOVER)
                     {
-
                         foreach (NetInterface x in interfaces)
                         {
                             if (x.IsAvailable() && !offeredInterfacesNumbers.Contains(x.GetInterfaceNumber()))
