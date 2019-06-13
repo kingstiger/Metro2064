@@ -200,7 +200,7 @@ namespace MetronomySimul
             string temp = "";
             for (int i = 0; i < s.Count(); i++)
             {
-                if (s[i] != '.' && i == s.Count() - 1)
+                if (s[i] != '.' && i != s.Count() - 1)
                 {
                     temp += s[i];
                 } else
