@@ -21,7 +21,7 @@ namespace MetronomySimul
         private IPEndPoint multicastReceivingEndpoint;
         private Mutex offeredMutex;
         public int seconds_elapsed_since_last_pings;
-        private Thread processing, sending, listening, cyclic;
+        private Thread cyclic;
         
         public Watchdog(int amount_of_interfaces) : base(0)
 		{
@@ -36,10 +36,8 @@ namespace MetronomySimul
            }
             netClient.Client.EnableBroadcast = true;
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
-            processing = new Thread(new ThreadStart(ProcessingThread));
-            listening = new Thread(new ThreadStart(ListenerThread));
-            sending = new Thread(new ThreadStart(SenderThread));
-            cyclic = new Thread(new ThreadStart(Cyclic));
+            cyclic = new Thread(Cyclic);
+            cyclic.Start();
         }
 
         //cyklicznie wysyła PING oraz DISCOVER
