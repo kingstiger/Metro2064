@@ -217,7 +217,7 @@ namespace MetronomySimul
         //Konwertuje wszystkie dane pakietu na jednen ciąg znaków
         private string ToOneStr()
         {
-            string s = IptoStr(sender_IP) + '<' + IptoStr(receiver_IP) + '<'
+            string s = sender_IP.ToString() + '<' + receiver_IP.ToString() + '<'
                 + sender_port.ToString() + '<' + receiver_port.ToString() + '<'
                 + seq_number.ToString() + '<' + operation + '<' + data;
             return s;
@@ -265,13 +265,29 @@ namespace MetronomySimul
                 for (i = 0; msg[i] != '<'; i++)
                 {
                     sendIP += msg[i];
-                    sendPort += msg[i + 5];
-                    recIP += msg[i + 10];
-                    recPort += msg[i + 15];
-                    sqnumber += msg[i + 20];
                 }
-                sender_IP = StringtoIP(sendIP);
-                receiver_IP = StringtoIP(recIP);
+                i++;
+                for(; msg[i] != '<'; i++)
+                {
+                    recIP += msg[i];
+                }
+                i++;
+                for (; msg[i] != '<'; i++)
+                {
+                    sender_port += msg[i]
+                }
+                i++;
+                for (; msg[i] != '<'; i++)
+                {
+                    receiver_port += msg[i];
+                }
+                i++;
+                for (; msg[i] != '<'; i++)
+                {
+                    seq_number += msg[i];
+                }
+                sender_IP = IPAddress.Parse(sendIP);
+                receiver_IP = IPAddress.Parse(recIP);
                 sender_port = Int32.Parse(sendPort);
                 receiver_port = Int32.Parse(recPort);
                 seq_number = Int32.Parse(sqnumber);
