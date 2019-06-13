@@ -15,12 +15,13 @@ namespace MetronomySimul
 {
 	sealed class Watchdog : NetInterface
 	{
-        private List<NetInterface> interfaces;
+        private List<NetInterface> interfaces = new List<NetInterface>();
         private List<int> offeredInterfacesNumbers;   //Lista interfejsów zaoferowanych do innych metronomów. Para IPAddress oferenta oraz numer naszego interfejsu
         public List<NetPacket> connectedInterfaces = new List<NetPacket>(); //Gotowe do wysłania NetPacket-y (do wstawienia PING albo DISCOVER)
         private IPEndPoint multicastReceivingEndpoint;
         private Mutex offeredMutex;
         public int seconds_elapsed_since_last_pings;
+        private Thread processing, sending, listening, cyclic;
         
         public Watchdog(int amount_of_interfaces) : base(0)
 		{
@@ -35,6 +36,10 @@ namespace MetronomySimul
            }
             netClient.Client.EnableBroadcast = true;
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
+            processing = new Thread(new ThreadStart(ProcessingThread));
+            listening = new Thread(new ThreadStart(ListenerThread));
+            sending = new Thread(new ThreadStart(SenderThread));
+            cyclic = new Thread(new ThreadStart(Cyclic));
         }
 
         //cyklicznie wysyła PING oraz DISCOVER

@@ -18,7 +18,7 @@ namespace MetronomySimul
         private Watchdog watchdog;
         private double wychylenie, frequency = 0; //wychylenie <-1, 1>, czestotliwosc (0Hz, 1Hz>
         private int kierunek; //kierunek {-1, 1}
-        private Thread thread;
+        private Thread thread, conThread;
         private string[] connectionsConsole = new string[4];
         public Form1()
         {
@@ -33,31 +33,31 @@ namespace MetronomySimul
             else kierunek = -1;
 
             watchdog = new Watchdog(4); //Tu zmieniaj ilosc interfejsow (domyslnie 4)
+            InitializeComponent();
+            progressBar1.Maximum = 1000;
+            progressBar2.Maximum = 1000;
             
             thread = new Thread(PendulumThread);
             thread.Start();
-            new Thread(ConnectionsThread).Start();           
-            InitializeComponent();
+            conThread = new Thread(ConnectionsThread);
+            conThread.Start();
         }
 
         private void ConnectionsThread()
         {
-            while(true)
+            while (true)
             {
-                bool _modified = true;
-                int number_of_interfaces_connected = 0;
-                if(_modified)
+                if (IsHandleCreated)
                 {
-                    number_of_interfaces_connected = 0;
                     Invoke
-                            (new Action(() =>
-                            {
-                                activeConnections.Text += "";
-                            }));
+                        (new Action(() =>
+                        {
+                            activeConnections.Text += "";
+                        }));
                     foreach (NetPacket x in watchdog.connectedInterfaces)
                     {
                         connectionsConsole[watchdog.connectedInterfaces.IndexOf(x)] = $"IP Adrress: {x.receiver_IP}; Port: {x.receiver_port}; Time since last PING: {watchdog.seconds_elapsed_since_last_pings}";
-                        number_of_interfaces_connected++;
+
                     }
                     for (int i = 0; i < connectionsConsole.Length; i++)
                     {
@@ -76,10 +76,8 @@ namespace MetronomySimul
                             }));
 
                     }
-                    _modified = false;
                 }
-                if (watchdog.connectedInterfaces.Count != number_of_interfaces_connected)
-                    _modified = true;
+                Thread.Sleep(1000);
             }
         }
 
@@ -87,13 +85,13 @@ namespace MetronomySimul
         {
             while (true)
             {
-
+                
                 //tu będzie oscylacja
                 //nie wiem czy to zadziała
                 //jak bedzie GUI to sie przekonamy
                 while (true)
                 {
-                    if (OscillatorUpdator.oscillation_info_foreign.Any())
+                    if (OscillatorUpdator.oscillation_info_foreign.Count > 0)
                     {
                         Tuple<double, double> rcvd_info;
                         rcvd_info = OscillatorUpdator.GetOscInfoForeign();
@@ -117,22 +115,27 @@ namespace MetronomySimul
 
                         if (wychylenie > 0)
                         {
-                            Invoke
-                            (new Action(() =>
+                            if (IsHandleCreated)
                             {
-                                progressBar1.Value = (int)(wychylenie * 1000);
-                                textBox1.Text = wychylenie.ToString();
-                            }));
+                                Invoke
+                                (new Action(() =>
+                                {
+                                    progressBar1.Value = (int)(wychylenie * 1000);
+                                    textBox1.Text = wychylenie.ToString();
+                                }));
+                            }
                         }
                         if (wychylenie < 0)
                         {
-                            Invoke
-                            (new Action(() =>
+                            if (IsHandleCreated)
                             {
-                                progressBar2.Value = (-1) * (int)(wychylenie * 1000);
-                                textBox1.Text = wychylenie.ToString();
-                            }));
-
+                                Invoke
+                                (new Action(() =>
+                                {
+                                    progressBar2.Value = (-1) * (int)(wychylenie * 1000);
+                                    textBox1.Text = wychylenie.ToString();
+                                }));
+                            }
                         }
 
                     }

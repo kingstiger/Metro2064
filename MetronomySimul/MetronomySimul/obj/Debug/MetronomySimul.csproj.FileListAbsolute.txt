@@ -1,0 +1,10 @@
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csprojAssemblyReference.cache
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.Form1.resources
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csproj.GenerateResource.cache
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.exe.config
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.exe
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.pdb
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.Properties.Resources.resources
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csproj.CoreCompileInputs.cache
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.exe
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.pdb

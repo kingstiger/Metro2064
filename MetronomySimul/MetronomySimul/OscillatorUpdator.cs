@@ -9,9 +9,9 @@ namespace MetronomySimul
 {
     public static class OscillatorUpdator
     {
-        public static Queue<Tuple<double, double>> oscillation_info_foreign; //kolejka z informacjami od innych metronomów w sieci
-        public static Queue<Tuple<double, double>> oscillation_info_domestic; //kolejka z informacjami dla innych metronomów w sieci
-        public static Mutex m;
+        public static Queue<Tuple<double, double>> oscillation_info_foreign = new Queue<Tuple<double, double>>(); //kolejka z informacjami od innych metronomów w sieci
+        public static Queue<Tuple<double, double>> oscillation_info_domestic = new Queue<Tuple<double, double>>(); //kolejka z informacjami dla innych metronomów w sieci
+        public static Mutex m = new Mutex();
 
         /// <summary>
         /// Metoda do pobierania z kolejki informacji o oscylacji otrzymanych od innych metronomów w sieci
