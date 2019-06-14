@@ -36,7 +36,7 @@ namespace MetronomySimul
 			listenerThread = new Thread(new ThreadStart(ListenerThread));
 			processingThread = new Thread(new ThreadStart(ProcessingThread));
             
-			localEndPoint = new IPEndPoint(IPAddress.Parse("169.254.136.247"), GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
+			localEndPoint = new IPEndPoint(IPAddress.Parse("169.254.3.66"), GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
 		}
 

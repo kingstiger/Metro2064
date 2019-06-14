@@ -21,6 +21,7 @@ namespace MetronomySimul
         private IPEndPoint multicastReceivingEndpoint;
         private Mutex offeredMutex;
         public int seconds_elapsed_since_last_pings;
+        private int[] seconds_to_disconnect;
         private Thread cyclic;
         
         public Watchdog(int amount_of_interfaces) : base(0)
@@ -38,6 +39,7 @@ namespace MetronomySimul
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
             cyclic = new Thread(Cyclic);
             cyclic.Start();
+            seconds_to_disconnect = new int[amount_of_interfaces + 1];
         }
 
         //cyklicznie wysyła PING oraz DISCOVER
@@ -56,6 +58,17 @@ namespace MetronomySimul
                         {
                             if (!x.IsAvailable())
                             {
+                                if(seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
+                                {
+                                    x.TerminateConnection();
+                                    foreach(NetPacket y in connectedInterfaces)
+                                    {
+                                        if(y.sender_port == x.GetPortNumber(x.GetInterfaceNumber()))
+                                        {
+                                            connectedInterfaces.Remove(y);
+                                        }
+                                    }
+                                }
                                 foreach (NetPacket y in connectedInterfaces)
                                 {
                                     if (y.data == $"{interfaces.IndexOf(x) + 1}")
@@ -64,6 +77,7 @@ namespace MetronomySimul
                                         cyclic.data = "";
                                         cyclic.operation = Operations.PING;
                                         AddAwaitingToSendPacket(cyclic);
+                                        seconds_to_disconnect[interfaces.IndexOf(x) + 1] = 10;
                                     }
                                 }
                             }
@@ -78,6 +92,10 @@ namespace MetronomySimul
                 } else
                 {
                     seconds_elapsed_since_last_pings++;
+                    for (int i = 1; i < seconds_to_disconnect.Length; i++)
+                    {
+                        seconds_to_disconnect[i]--;
+                    }
                     Thread.Sleep(1000);
                 }
             }
@@ -138,6 +156,13 @@ namespace MetronomySimul
                     {
                         if (toProcess.data == Operations.PING)
                         {
+                            foreach (NetPacket y in connectedInterfaces)
+                            {
+                                if (y.receiver_port == toProcess.sender_port)
+                                {
+                                    seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 10;
+                                }
+                            }
                             //przestawiamy flagę oczekiwania na ACK po PINGU (go home, ur drunk)
                         }
                         else

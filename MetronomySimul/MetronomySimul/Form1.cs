@@ -52,11 +52,11 @@ namespace MetronomySimul
                     Invoke
                         (new Action(() =>
                         {
-                            activeConnections.Text += "";
+                            activeConnections.Text += "\r\n";
                         }));
                     foreach (NetPacket x in watchdog.connectedInterfaces)
                     {
-                        connectionsConsole[watchdog.connectedInterfaces.IndexOf(x)] = $"IP Adrress: {x.receiver_IP}; Port: {x.receiver_port}; Time since last PING: {watchdog.seconds_elapsed_since_last_pings}";
+                        connectionsConsole[watchdog.connectedInterfaces.IndexOf(x)] = $"IP Adrress: {x.receiver_IP}; Port: {x.receiver_port}; Time since last PING: {watchdog.seconds_elapsed_since_last_pings} ";
 
                     }
                     for (int i = 0; i < connectionsConsole.Length; i++)
