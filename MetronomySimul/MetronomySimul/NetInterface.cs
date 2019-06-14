@@ -52,7 +52,7 @@ namespace MetronomySimul
 			{
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-				AddReceivedPacket(receivedPacket);
+                packetsReceived.Enqueue(receivedPacket);
 			}
 		}
 

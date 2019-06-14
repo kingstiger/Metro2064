@@ -7,3 +7,4 @@ D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Release\MetronomySimul.
 D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Release\MetronomySimul.csproj.CoreCompileInputs.cache
 D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Release\MetronomySimul.exe
 D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Release\MetronomySimul.pdb
+D:\METRONOMY\Metro2064\MetronomySimul\MetronomySimul\obj\Release\MetronomySimul.csprojAssemblyReference.cache

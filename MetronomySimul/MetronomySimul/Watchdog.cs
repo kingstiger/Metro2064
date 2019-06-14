@@ -97,7 +97,7 @@ namespace MetronomySimul
                     {
                         foreach (NetInterface x in interfaces)
                         {
-                            if (x.IsAvailable() && !offeredInterfacesNumbers.Contains(x.GetInterfaceNumber()))
+                            if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x) + 1)))
                             {
                                 NetPacket packetToSend = new NetPacket(toProcess, localEndPoint.Address, x.GetInterfaceNumber().ToString());
                                 AddOfferedInterface(interfaces.IndexOf(x) + 1);
@@ -113,7 +113,7 @@ namespace MetronomySimul
                     {
                         foreach (NetInterface x in interfaces)
                         {
-                            if (x.IsAvailable() && !offeredInterfacesNumbers.Contains(x.GetInterfaceNumber()))
+                            if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
                             {
                                 x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(Int32.Parse(toProcess.data))));
                                 connectedInterfaces.Add(new NetPacket(toProcess, $"{interfaces.IndexOf(x) + 1}"));

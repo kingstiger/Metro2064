@@ -262,7 +262,8 @@ namespace MetronomySimul
 
             //read IPs, ports, eq number
             {
-                string sendIP = "", recIP = "", sqnumber = "", sendPort = "", recPort = "", operation = "";
+                operation = "";
+                string sendIP = "", recIP = "", sqnumber = "", sendPort = "", recPort = "";
                 for (i = 0; msg[i] != '<'; i++)
                 {
                     sendIP += msg[i];
