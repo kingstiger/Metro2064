@@ -35,9 +35,9 @@
             this.progressBar2 = new System.Windows.Forms.ProgressBar();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.activeConnections = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.activeConnections = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -113,6 +113,15 @@
             this.tabPage2.Text = "Aktywne połączenia";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // activeConnections
+            // 
+            this.activeConnections.Location = new System.Drawing.Point(144, 108);
+            this.activeConnections.Multiline = true;
+            this.activeConnections.Name = "activeConnections";
+            this.activeConnections.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.activeConnections.Size = new System.Drawing.Size(630, 269);
+            this.activeConnections.TabIndex = 0;
+            // 
             // tabPage3
             // 
             this.tabPage3.Cursor = System.Windows.Forms.Cursors.No;
@@ -131,15 +140,6 @@
             this.splitter1.Size = new System.Drawing.Size(8, 630);
             this.splitter1.TabIndex = 1;
             this.splitter1.TabStop = false;
-            // 
-            // activeConnections
-            // 
-            this.activeConnections.Location = new System.Drawing.Point(144, 108);
-            this.activeConnections.Multiline = true;
-            this.activeConnections.Name = "activeConnections";
-            this.activeConnections.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.activeConnections.Size = new System.Drawing.Size(630, 269);
-            this.activeConnections.TabIndex = 0;
             // 
             // Form1
             // 

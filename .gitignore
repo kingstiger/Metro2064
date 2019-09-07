@@ -1,0 +1,11 @@
+
+*.pdb
+MetronomySimul/.vs/MetronomySimul/v15/.suo
+*.ide
+*.ide-shm
+*.ide-wal
+*.exe
+*.pdb
+*.exe
+*.exe
+*.cache

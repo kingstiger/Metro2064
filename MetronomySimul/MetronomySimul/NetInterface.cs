@@ -23,7 +23,7 @@ namespace MetronomySimul
         /// <summary>
         /// Tworzy nowy inerfejs sieciowy o numerze zgodnym z interfaceNumber
         /// </summary>
-        /// <param name="interfaceNumber"></param>
+        /// <param name="interfaceNumber">  numer interfejsu w celu dobrania odpowiedniego portu </param>
 		public NetInterface(int interfaceNumber)                              //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
 		{
             seq_number = 0;
@@ -36,7 +36,7 @@ namespace MetronomySimul
 			listenerThread = new Thread(new ThreadStart(ListenerThread));
 			processingThread = new Thread(new ThreadStart(ProcessingThread));
             
-			localEndPoint = new IPEndPoint(IPAddress.Parse("169.254.3.66"), GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
+			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.9"), GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
 		}
 
