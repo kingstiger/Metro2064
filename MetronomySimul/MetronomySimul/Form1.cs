@@ -32,7 +32,7 @@ namespace MetronomySimul
                 kierunek = 1;
             else kierunek = -1;
 
-            watchdog = new Watchdog(4); //Tu zmieniaj ilosc interfejsow (domyslnie 4)
+            watchdog = new Watchdog(4, this); //Tu zmieniaj ilosc interfejsow (domyslnie 4)
             InitializeComponent();
             progressBar1.Maximum = 1000;
             progressBar2.Maximum = 1000;
@@ -148,6 +148,15 @@ namespace MetronomySimul
 
         }
 
+        public void DisplayOnLog(string text)
+        {
+            try
+            {
+                Log.Invoke(new Action(() => Log.AppendText("\n" + text)));
+            }
+            catch (Exception e) {; }
+                
+        }
        
     }
 }

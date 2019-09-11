@@ -38,9 +38,11 @@
             this.activeConnections = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.Log = new System.Windows.Forms.RichTextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.tabPage3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -124,6 +126,7 @@
             // 
             // tabPage3
             // 
+            this.tabPage3.Controls.Add(this.Log);
             this.tabPage3.Cursor = System.Windows.Forms.Cursors.No;
             this.tabPage3.Location = new System.Drawing.Point(4, 22);
             this.tabPage3.Name = "tabPage3";
@@ -141,6 +144,18 @@
             this.splitter1.TabIndex = 1;
             this.splitter1.TabStop = false;
             // 
+            // Log
+            // 
+            this.Log.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.Log.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.Log.ForeColor = System.Drawing.SystemColors.MenuBar;
+            this.Log.Location = new System.Drawing.Point(6, 6);
+            this.Log.Name = "Log";
+            this.Log.ReadOnly = true;
+            this.Log.Size = new System.Drawing.Size(934, 568);
+            this.Log.TabIndex = 0;
+            this.Log.Text = "Metronomy log";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -156,6 +171,7 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -172,5 +188,6 @@
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox activeConnections;
+        public System.Windows.Forms.RichTextBox Log;
     }
 }

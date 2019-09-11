@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using System;
 /*
 Klasa NetInterface jest implementacją interfejsu sieciowego metronomu. Klasa ta posiada swoją instancję klienta UDP, oraz metody
 pozwalające na komunikację z innymi interfejsami. Schemat datagramu wykorzystywanego przez tą klasę znajduję się w klasie NetPacket.
@@ -14,18 +15,23 @@ namespace MetronomySimul
 	{
 		protected UdpClient netClient;                                        //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
         protected IPEndPoint localEndPoint; 
-        private IPEndPoint targetEndPoint;                                      //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
+        private IPEndPoint targetEndPoint;                                    //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
 		protected Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
         protected Mutex sendMutex, receiveMutex;                              //Muteksy dla kolejek komnikatów
         private bool isAvailable { get; set; }                                //Oznacza, czy interfejs nie ma już połączenia
 		protected Thread senderThread, listenerThread, processingThread;	  //Uchwyty na wątki
         private int seq_number;
+
+        public Form1 form; //Uchwyt na okno
+        public int interfaceNumber; //Numer interfejsu
+
         /// <summary>
         /// Tworzy nowy inerfejs sieciowy o numerze zgodnym z interfaceNumber
         /// </summary>
         /// <param name="interfaceNumber">  numer interfejsu w celu dobrania odpowiedniego portu </param>
-		public NetInterface(int interfaceNumber)                              //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
+		public NetInterface(int interfaceNumber, Form1 form)                              //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
 		{
+            this.form = form;
             seq_number = 0;
             sendMutex = new Mutex();
             receiveMutex = new Mutex();
@@ -35,8 +41,9 @@ namespace MetronomySimul
 			senderThread = new Thread(new ThreadStart(SenderThread));
 			listenerThread = new Thread(new ThreadStart(ListenerThread));
 			processingThread = new Thread(new ThreadStart(ProcessingThread));
+            this.interfaceNumber = interfaceNumber;
             
-			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.9"), GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
+			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.8"), GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
 		}
 
@@ -66,7 +73,8 @@ namespace MetronomySimul
 				if(packetsToSend.Count > 0)
 				{
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(GetAwaitingToSendPacket());
-					netClient.Send(bytesToSend, bytesToSend.Length, targetEndPoint);
+                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\tSending bytes: " + bytesToSend.ToString() + " to " + targetEndPoint.ToString()); 
+                    netClient.Send(bytesToSend, bytesToSend.Length, targetEndPoint);
 				}
 			}
 		}
@@ -82,9 +90,10 @@ namespace MetronomySimul
                 if(packetsReceived.Count > 0)
                 {
                     NetPacket toProcess = GetReceivedPacket();
+                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\tReceived: " + toProcess.operation + " from " + toProcess.sender_IP);
 
 
-                    if(toProcess.operation == Operations.SYNC)
+                    if (toProcess.operation == Operations.SYNC)
                     {
                         OscillatorUpdator.GiveOscInfoForeign(NetPacket.ReadOscInfoFromData(toProcess.data));
                     }
@@ -203,7 +212,10 @@ namespace MetronomySimul
 
 			//Sorki, mam chłopaka
 			isAvailable = false;
-		}
+
+            //Log
+            this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t has connected to " + targetEndPoint.Address.ToString());
+        }
 
 		public void TerminateConnection()
 		{
@@ -221,6 +233,9 @@ namespace MetronomySimul
 
 			//Od dzisiaj jestem wolna
 			isAvailable = true;
-		}
+
+            //Log
+            this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t has disconected from another metronome");
+        }
 	}
 }

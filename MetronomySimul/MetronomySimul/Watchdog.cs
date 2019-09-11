@@ -24,7 +24,7 @@ namespace MetronomySimul
         private int[] seconds_to_disconnect;
         private Thread cyclic;
         
-        public Watchdog(int amount_of_interfaces) : base(0)
+        public Watchdog(int amount_of_interfaces, Form1 form) : base(0, form)
 		{
             multicastReceivingEndpoint = new IPEndPoint(IPAddress.Any, GetPortNumber(0));
 
@@ -33,7 +33,7 @@ namespace MetronomySimul
 
            for (int i = 1; i <= amount_of_interfaces; i++)
            {
-                interfaces.Add(new NetInterface(i));
+                interfaces.Add(new NetInterface(i, form));
            }
             netClient.Client.EnableBroadcast = true;
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
@@ -188,6 +188,7 @@ namespace MetronomySimul
                 if (packetsToSend.Count > 0)
                 {
                     NetPacket toSendPacket = GetAwaitingToSendPacket();
+                    this.form.DisplayOnLog("WATCHDOG>#\tSending: " + toSendPacket.operation + " to " + toSendPacket.receiver_IP);
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(toSendPacket);
                     netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, toSendPacket.receiver_port));
                 }
@@ -203,6 +204,7 @@ namespace MetronomySimul
             {
                 receivedBytes = netClient.Receive(ref multicastReceivingEndpoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
+                this.form.DisplayOnLog("WATCHDOG>#\tReceived: " + receivedPacket.operation + " from " + receivedPacket.sender_IP);
                 AddReceivedPacket(receivedPacket);
             }
         }
@@ -229,6 +231,7 @@ namespace MetronomySimul
             {
                 offeredMutex.WaitOne();
                 offeredInterfacesNumbers.Add(offeredInterfaceNumber);
+                this.form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " offered. Awaiting connection...");
                 offeredMutex.ReleaseMutex();
             }
 
@@ -243,8 +246,13 @@ namespace MetronomySimul
             foreach (int n in offeredInterfacesNumbers)
             {
                 if (n == offeredInterfaceNumber)
+                {
                     offeredInterfacesNumbers.Remove(n);
+                    this.form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " is no longer offered");
+                }
             }
+
+     
 
             offeredMutex.ReleaseMutex();
         }
