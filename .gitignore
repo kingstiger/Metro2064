@@ -10,3 +10,8 @@ MetronomySimul/.vs/MetronomySimul/v15/.suo
 *.exe
 *.cache
 *.ide
+*.cache
+*.pdb
+*.exe
+*.ide-shm
+*.ide-wal
