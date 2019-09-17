@@ -188,7 +188,7 @@ namespace MetronomySimul
                 if (packetsToSend.Count > 0)
                 {
                     NetPacket toSendPacket = GetAwaitingToSendPacket();
-                    this.form.DisplayOnLog("WATCHDOG>#\tSending: " + toSendPacket.operation + " to " + toSendPacket.receiver_IP);
+                    form.DisplayOnLog("WATCHDOG>#\tSending: " + toSendPacket.operation + " to " + toSendPacket.receiver_IP);
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(toSendPacket);
                     netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, toSendPacket.receiver_port));
                 }
@@ -204,8 +204,11 @@ namespace MetronomySimul
             {
                 receivedBytes = netClient.Receive(ref multicastReceivingEndpoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-                this.form.DisplayOnLog("WATCHDOG>#\tReceived: " + receivedPacket.operation + " from " + receivedPacket.sender_IP);
-                AddReceivedPacket(receivedPacket);
+                if (receivedPacket.sender_IP != localEndPoint.Address)
+                {
+                    form.DisplayOnLog("WATCHDOG>#\tReceived: " + receivedPacket.operation + " from " + receivedPacket.sender_IP);
+                    AddReceivedPacket(receivedPacket);
+                }
             }
         }
 
@@ -231,7 +234,7 @@ namespace MetronomySimul
             {
                 offeredMutex.WaitOne();
                 offeredInterfacesNumbers.Add(offeredInterfaceNumber);
-                this.form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " offered. Awaiting connection...");
+                form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " offered. Awaiting connection...");
                 offeredMutex.ReleaseMutex();
             }
 
@@ -248,7 +251,7 @@ namespace MetronomySimul
                 if (n == offeredInterfaceNumber)
                 {
                     offeredInterfacesNumbers.Remove(n);
-                    this.form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " is no longer offered");
+                    form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " is no longer offered");
                 }
             }
 

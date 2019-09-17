@@ -31,7 +31,7 @@ namespace MetronomySimul
         /// <param name="interfaceNumber">  numer interfejsu w celu dobrania odpowiedniego portu </param>
 		public NetInterface(int interfaceNumber, Form1 form)                              //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
 		{
-            this.form = form;
+            form = form;
             seq_number = 0;
             sendMutex = new Mutex();
             receiveMutex = new Mutex();
@@ -41,7 +41,7 @@ namespace MetronomySimul
 			senderThread = new Thread(new ThreadStart(SenderThread));
 			listenerThread = new Thread(new ThreadStart(ListenerThread));
 			processingThread = new Thread(new ThreadStart(ProcessingThread));
-            this.interfaceNumber = interfaceNumber;
+            interfaceNumber = interfaceNumber;
             
 			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.8"), GetPortNumber(interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
@@ -59,7 +59,10 @@ namespace MetronomySimul
 			{
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-                packetsReceived.Enqueue(receivedPacket);
+                if (receivedPacket.sender_IP != localEndPoint.Address)
+                {
+                    packetsReceived.Enqueue(receivedPacket);
+                }
 			}
 		}
 
@@ -73,7 +76,7 @@ namespace MetronomySimul
 				if(packetsToSend.Count > 0)
 				{
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(GetAwaitingToSendPacket());
-                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\tSending bytes: " + bytesToSend.ToString() + " to " + targetEndPoint.ToString()); 
+                    form.DisplayOnLog("ETH" + interfaceNumber + ">$\tSending bytes: " + bytesToSend.ToString() + " to " + targetEndPoint.ToString()); 
                     netClient.Send(bytesToSend, bytesToSend.Length, targetEndPoint);
 				}
 			}
@@ -90,7 +93,7 @@ namespace MetronomySimul
                 if(packetsReceived.Count > 0)
                 {
                     NetPacket toProcess = GetReceivedPacket();
-                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\tReceived: " + toProcess.operation + " from " + toProcess.sender_IP);
+                    form.DisplayOnLog("ETH" + interfaceNumber + ">$\tReceived: " + toProcess.operation + " from " + toProcess.sender_IP);
 
 
                     if (toProcess.operation == Operations.SYNC)
@@ -196,14 +199,14 @@ namespace MetronomySimul
 
         public int GetPortNumber(int interfaceNumber) => 8080 + interfaceNumber;
 
-        public int GetInterfaceNumber() => this.localEndPoint.Port - 8080;
+        public int GetInterfaceNumber() => localEndPoint.Port - 8080;
 
-        public bool IsAvailable() => this.isAvailable;
+        public bool IsAvailable() => isAvailable;
 
 	    public void SetConnection(IPEndPoint targetEndPoint)
 		{
 			//Inicjalizacja pól
-			this.targetEndPoint = targetEndPoint;
+			targetEndPoint = targetEndPoint;
 
             //Uruchomienie wątków
             processingThread.Start();
@@ -214,7 +217,7 @@ namespace MetronomySimul
 			isAvailable = false;
 
             //Log
-            this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t has connected to " + targetEndPoint.Address.ToString());
+            form.DisplayOnLog("ETH" + interfaceNumber + ">$\t has connected to " + targetEndPoint.Address.ToString());
         }
 
 		public void TerminateConnection()
@@ -235,7 +238,7 @@ namespace MetronomySimul
 			isAvailable = true;
 
             //Log
-            this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t has disconected from another metronome");
+            form.DisplayOnLog("ETH" + interfaceNumber + ">$\t has disconected from another metronome");
         }
 	}
 }
