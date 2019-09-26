@@ -23,7 +23,7 @@ namespace MetronomySimul
         public int seconds_elapsed_since_last_pings;
         private int[] seconds_to_disconnect;
 //private Thread cyclic;
-        
+
         public Watchdog(int amount_of_interfaces, Form1 form) : base(0, form)
 		{
             multicastReceivingEndpoint = new IPEndPoint(IPAddress.Any, GetPortNumber(0));
@@ -133,12 +133,19 @@ namespace MetronomySimul
                         {
                             if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
                             {
-
-                                x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(Int32.Parse(toProcess.data, System.Globalization.NumberStyles.Integer))));
+                                try
+                                {
+                                    int portNumber = int.Parse(toProcess.data);
+                                } catch (FormatException)
+                                {
+                                    goto End;
+                                }
+                                x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(int.Parse(toProcess.data, System.Globalization.NumberStyles.Integer))));
                                 connectedInterfaces.Add(new NetPacket(toProcess, $"{interfaces.IndexOf(x) + 1}"));
                                 //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
                                 NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
                                 AddAwaitingToSendPacket(packetToSend);
+                                End:
                                 break;
                             }
                         }
@@ -169,7 +176,7 @@ namespace MetronomySimul
                         else
                         {
                             //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
-                            
+
                         }
                     }
 
@@ -178,7 +185,7 @@ namespace MetronomySimul
 
                     }
                 }
-                
+
             }
         }
 
@@ -281,13 +288,13 @@ namespace MetronomySimul
                 }
             }
 
-     
+
 
             offeredMutex.ReleaseMutex();
         }
-        
+
         /// <summary>
-        /// Zwraca wartosć true jeżeli metronom ma co najmniej jedno zestawione połączenie 
+        /// Zwraca wartosć true jeżeli metronom ma co najmniej jedno zestawione połączenie
         /// </summary>
         /// <returns></returns>
         private bool AmIConnectedSomewhere()
@@ -300,9 +307,8 @@ namespace MetronomySimul
 
             return false;
         }
-        
-        
+
+
 
     }
 }
-
