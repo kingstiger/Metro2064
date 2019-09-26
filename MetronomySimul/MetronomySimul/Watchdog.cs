@@ -22,7 +22,7 @@ namespace MetronomySimul
         private Mutex offeredMutex;
         public int seconds_elapsed_since_last_pings;
         private int[] seconds_to_disconnect;
-        private Thread cyclic;
+//private Thread cyclic;
         
         public Watchdog(int amount_of_interfaces, Form1 form) : base(0, form)
 		{
@@ -37,8 +37,8 @@ namespace MetronomySimul
            }
             netClient.Client.EnableBroadcast = true;
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
-            cyclic = new Thread(Cyclic);
-            cyclic.Start();
+            //cyclic = new Thread(Cyclic);
+            //cyclic.Start();
             seconds_to_disconnect = new int[amount_of_interfaces + 1];
         }
 
@@ -49,7 +49,7 @@ namespace MetronomySimul
             seconds_elapsed_since_last_pings = 0;
             while (true)
             {
-                if (seconds_elapsed_since_last_pings > 10)
+                if (seconds_elapsed_since_last_pings > 100)
                 {
                     NetPacket cyclic;
                     if (connectedInterfaces.Count > 0)
@@ -133,7 +133,8 @@ namespace MetronomySimul
                         {
                             if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
                             {
-                                x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(Int32.Parse(toProcess.data))));
+
+                                x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(Int32.Parse(toProcess.data, System.Globalization.NumberStyles.Integer))));
                                 connectedInterfaces.Add(new NetPacket(toProcess, $"{interfaces.IndexOf(x) + 1}"));
                                 //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
                                 NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
@@ -197,7 +198,7 @@ namespace MetronomySimul
                         continue;
                     }
                 }
-                cyclic.Abort();
+                //cyclic.Abort();
             } catch(ThreadStateException ex)
             {
                 throw ex;
@@ -210,7 +211,8 @@ namespace MetronomySimul
             {
                 if (packetsToSend.Count > 0)
                 {
-                    NetPacket toSendPacket = GetAwaitingToSendPacket();
+                    NetPacket toSendPacket = new NetPacket();
+                    toSendPacket = GetAwaitingToSendPacket();
                     this.form.DisplayOnLog("WATCHDOG>#\tSending: " + toSendPacket.operation + " to " + toSendPacket.receiver_IP);
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(toSendPacket);
                     netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, toSendPacket.receiver_port));
@@ -225,6 +227,7 @@ namespace MetronomySimul
 
             while (true)
             {
+                receivedPacket = new NetPacket();
                 receivedBytes = netClient.Receive(ref multicastReceivingEndpoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
                 if (receivedPacket.sender_IP != localEndPoint.Address)

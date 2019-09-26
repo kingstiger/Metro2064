@@ -57,6 +57,7 @@ namespace MetronomySimul
 
 			while(true)
 			{
+                receivedPacket = new NetPacket();
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
                 if (receivedPacket.sender_IP != localEndPoint.Address)
@@ -206,7 +207,7 @@ namespace MetronomySimul
 	    public void SetConnection(IPEndPoint targetEndPoint)
 		{
 			//Inicjalizacja pól
-			targetEndPoint = targetEndPoint;
+			this.targetEndPoint = targetEndPoint;
 
             //Uruchomienie wątków
             processingThread.Start();
