@@ -37,8 +37,9 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.activeConnections = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.Log = new System.Windows.Forms.RichTextBox();
+            this.splitter1 = new System.Windows.Forms.Splitter();
+            this.CLOSEAPP = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -58,6 +59,7 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.CLOSEAPP);
             this.tabPage1.Controls.Add(this.textBox1);
             this.tabPage1.Controls.Add(this.label1);
             this.tabPage1.Controls.Add(this.progressBar2);
@@ -136,14 +138,6 @@
             this.tabPage3.Text = "Log";
             this.tabPage3.UseVisualStyleBackColor = true;
             // 
-            // splitter1
-            // 
-            this.splitter1.Location = new System.Drawing.Point(0, 0);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(8, 630);
-            this.splitter1.TabIndex = 1;
-            this.splitter1.TabStop = false;
-            // 
             // Log
             // 
             this.Log.BackColor = System.Drawing.SystemColors.HotTrack;
@@ -155,6 +149,26 @@
             this.Log.Size = new System.Drawing.Size(934, 568);
             this.Log.TabIndex = 0;
             this.Log.Text = "Metronomy log";
+            // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(0, 0);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(8, 630);
+            this.splitter1.TabIndex = 1;
+            this.splitter1.TabStop = false;
+            // 
+            // CLOSEAPP
+            // 
+            this.CLOSEAPP.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.CLOSEAPP.ForeColor = System.Drawing.Color.Red;
+            this.CLOSEAPP.Location = new System.Drawing.Point(865, 6);
+            this.CLOSEAPP.Name = "CLOSEAPP";
+            this.CLOSEAPP.Size = new System.Drawing.Size(75, 23);
+            this.CLOSEAPP.TabIndex = 4;
+            this.CLOSEAPP.Text = "Zamknij";
+            this.CLOSEAPP.UseVisualStyleBackColor = false;
+            this.CLOSEAPP.Click += new System.EventHandler(this.CLOSEAPP_Click);
             // 
             // Form1
             // 
@@ -189,5 +203,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox activeConnections;
         public System.Windows.Forms.RichTextBox Log;
+        private System.Windows.Forms.Button CLOSEAPP;
     }
 }

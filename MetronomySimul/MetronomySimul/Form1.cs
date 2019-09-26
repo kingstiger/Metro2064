@@ -22,6 +22,8 @@ namespace MetronomySimul
         private string[] connectionsConsole = new string[4];
         public Form1()
         {
+            InitializeComponent();
+            Thread.Sleep(2000);
             Random r = new Random();
             wychylenie = r.NextDouble() * r.Next(-1, 1);
             while (frequency == 0)
@@ -33,7 +35,6 @@ namespace MetronomySimul
             else kierunek = -1;
 
             watchdog = new Watchdog(4, this); //Tu zmieniaj ilosc interfejsow (domyslnie 4)
-            InitializeComponent();
             progressBar1.Maximum = 1000;
             progressBar2.Maximum = 1000;
             
@@ -143,6 +144,25 @@ namespace MetronomySimul
                 }
             }
         }
+
+        private void CLOSEAPP_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                conThread.Abort();
+                thread.Abort();
+                watchdog.StopThreads();
+                Application.Exit();
+                Environment.Exit(0);
+            } catch (ThreadAbortException)
+            {
+                ;
+            }catch (ThreadStateException)
+            {
+                ;
+            }
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
 
