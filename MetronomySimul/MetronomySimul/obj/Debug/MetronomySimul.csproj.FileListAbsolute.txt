@@ -18,3 +18,12 @@ C:\Users\adminl\Desktop\metronom\Metro2064\MetronomySimul\MetronomySimul\obj\Deb
 C:\Users\adminl\Desktop\metronom\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csproj.CoreCompileInputs.cache
 C:\Users\adminl\Desktop\metronom\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.exe
 C:\Users\adminl\Desktop\metronom\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.pdb
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.exe.config
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.exe
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.pdb
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csprojAssemblyReference.cache
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.Form1.resources
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.Properties.Resources.resources
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csproj.GenerateResource.cache
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.exe
+C:\Users\Sławek\Desktop\Nowy folder\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.pdb
