@@ -49,7 +49,7 @@ namespace MetronomySimul
             seconds_elapsed_since_last_pings = 0;
             while (true)
             {
-                if (seconds_elapsed_since_last_pings > 100)
+                if (seconds_elapsed_since_last_pings > 10)
                 {
                     NetPacket cyclic;
                     if (connectedInterfaces.Count > 0)
@@ -58,7 +58,13 @@ namespace MetronomySimul
                         {
                             if (!x.IsAvailable())
                             {
-                                if(seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
+                                if (OscillatorUpdator.oscillation_info_domestic.Count > 0)
+                                {
+                                    Tuple<double, double> oscilation_info = OscillatorUpdator.GetOscInfoDomestic();
+                                    x.AddAwaitingToSendPacket(x.MakeSyncPacket(oscilation_info)); 
+                                }
+
+                                if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
                                 {
                                     x.TerminateConnection();
                                     foreach(NetPacket y in connectedInterfaces)
@@ -103,8 +109,7 @@ namespace MetronomySimul
 
         protected override void ProcessingThread()
         {
-            while (true)
-            {
+            
                 //jak są jakieś otrzymane pakiety to je przetwarza
                 if (packetsReceived.Count > 0)
                 {
@@ -133,14 +138,7 @@ namespace MetronomySimul
                         {
                             if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
                             {
-                                try
-                                {
-                                    int portNumber = int.Parse(toProcess.data);
-                                } catch (FormatException)
-                                {
-                                    goto End;
-                                }
-                                x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(int.Parse(toProcess.data, System.Globalization.NumberStyles.Integer))));
+                                x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
                                 connectedInterfaces.Add(new NetPacket(toProcess, $"{interfaces.IndexOf(x) + 1}"));
                                 //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
                                 NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
@@ -186,7 +184,7 @@ namespace MetronomySimul
                     }
                 }
 
-            }
+            
         }
 
         public override void StopThreads()
@@ -241,10 +239,15 @@ namespace MetronomySimul
                 {
                     this.form.DisplayOnLog("WATCHDOG>#\tReceived: " + receivedPacket.operation + " from " + receivedPacket.sender_IP);
                     AddReceivedPacket(receivedPacket);
+                    Task.Run(async () => await Process());
                 }
             }
         }
-
+        private Task Process()
+        {
+            var result = Task.Run(() => ProcessingThread());
+            return result;
+        }
         /// <summary>
         /// Tworzenie pakietu do wysłania komunikatu DISCOVER
         /// </summary>

@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
-using System.Net.Sockets;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-using System;
 /*
 Klasa NetInterface jest implementacją interfejsu sieciowego metronomu. Klasa ta posiada swoją instancję klienta UDP, oraz metody
 pozwalające na komunikację z innymi interfejsami. Schemat datagramu wykorzystywanego przez tą klasę znajduję się w klasie NetPacket.
@@ -11,7 +10,7 @@ pozwalające na komunikację z innymi interfejsami. Schemat datagramu wykorzysty
 
 namespace MetronomySimul
 {
-	class NetInterface
+    class NetInterface
 	{
 		protected UdpClient netClient;                                        //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
         protected IPEndPoint localEndPoint; 
@@ -19,7 +18,7 @@ namespace MetronomySimul
 		protected Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
         protected Mutex sendMutex, receiveMutex;                              //Muteksy dla kolejek komnikatów
         private bool isAvailable { get; set; }                                //Oznacza, czy interfejs nie ma już połączenia
-		protected Thread senderThread, listenerThread, processingThread;	  //Uchwyty na wątki
+		protected Thread senderThread, listenerThread;	  //Uchwyty na wątki
         private int seq_number;
 
         public Form1 form; //Uchwyt na okno
@@ -40,7 +39,6 @@ namespace MetronomySimul
 			packetsReceived = new Queue<NetPacket>();
 			senderThread = new Thread(new ThreadStart(SenderThread));
 			listenerThread = new Thread(new ThreadStart(ListenerThread));
-			processingThread = new Thread(new ThreadStart(ProcessingThread));
             this.interfaceNumber = interfaceNumber;
             
 			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.8"), GetPortNumber(this.interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
@@ -60,9 +58,10 @@ namespace MetronomySimul
                 receivedPacket = new NetPacket();
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-                if (receivedPacket.sender_IP != localEndPoint.Address)
+                if (receivedPacket.sender_IP != localEndPoint.Address && receivedPacket.sender_port != GetPortNumber(0))
                 {
                     packetsReceived.Enqueue(receivedPacket);
+                    Task.Run(async () => await Process());
                 }
 			}
 		}
@@ -83,13 +82,18 @@ namespace MetronomySimul
 			}
 		}
 
+        private Task Process() {
+            var result = Task.Run(() => ProcessingThread());
+            return result;
+        }
+             
+
 		/// <summary>
 		/// Wątek przetwarzający odebrane pakiety
 		/// </summary>
 		virtual protected void ProcessingThread()
         {
-            while(true)
-            {
+        
                 //jak są jakieś otrzymane pakiety to je przetwarza
                 if(packetsReceived.Count > 0)
                 {
@@ -132,7 +136,7 @@ namespace MetronomySimul
                     AddAwaitingToSendPacket(MakeSyncPacket(oscilation_info)); //tu nie jestem pewien co z nr sekwencyjnym
 
                 }
-            }
+            
         }
 
 		
@@ -141,7 +145,7 @@ namespace MetronomySimul
         /// </summary>
         /// <param name="oscilation_info"></param>
         /// <returns></returns>
-        private NetPacket MakeSyncPacket(System.Tuple<double, double> oscilation_info)
+        public NetPacket MakeSyncPacket(System.Tuple<double, double> oscilation_info)
         {
             NetPacket sync = new NetPacket(
                         localEndPoint.Address, targetEndPoint.Address, localEndPoint.Port, targetEndPoint.Port,
@@ -191,7 +195,7 @@ namespace MetronomySimul
         /// Dodaje nowy pakiet do kolejki pakietów oczekujących na wysłanie
         /// </summary>
         /// <param name="newPacket"></param>
-        protected void AddAwaitingToSendPacket(NetPacket newPacket)
+        public void AddAwaitingToSendPacket(NetPacket newPacket)
         {
             sendMutex.WaitOne();
             packetsToSend.Enqueue(newPacket);
@@ -210,7 +214,6 @@ namespace MetronomySimul
 			this.targetEndPoint = targetEndPoint;
 
             //Uruchomienie wątków
-            processingThread.Start();
 			senderThread.Start();
 			listenerThread.Start();
 
@@ -227,7 +230,6 @@ namespace MetronomySimul
 #pragma warning disable CS0618 // Type or member is obsolete
             senderThread.Suspend();
             listenerThread.Suspend();
-            processingThread.Suspend();
 #pragma warning restore CS0618 // Type or member is obsolete
 
             //Czyszczenie pól
@@ -247,11 +249,62 @@ namespace MetronomySimul
             {
                 senderThread.Abort();
                 listenerThread.Abort();
-                processingThread.Abort();
             } catch(ThreadStateException ex)
             {
                 throw ex;
             }
+        }
+        
+        public int ParseToInt(string str)
+        {
+            int result = 0;
+            foreach(char x in str) {
+                switch (x)
+                {
+                    case '0':
+                        result *= 10;
+                        break;
+                    case '1':
+                        result += 1;
+                        result *= 10;
+                        break;
+                    case '2':
+                        result += 2;
+                        result *= 10;
+                        break;
+                    case '3':
+                        result += 3;
+                        result *= 10;
+                        break;
+                    case '4':
+                        result += 4;
+                        result *= 10;
+                        break;
+                    case '5':
+                        result += 5;
+                        result *= 10;
+                        break;
+                    case '6':
+                        result += 6;
+                        result *= 10;
+                        break;
+                    case '7':
+                        result += 7;
+                        result *= 10;
+                        break;
+                    case '8':
+                        result += 8;
+                        result *= 10;
+                        break;
+                    case '9':
+                        result += 9;
+                        result *= 10;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            return result;
         }
 	}
 }
