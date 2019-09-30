@@ -37,8 +37,6 @@ namespace MetronomySimul
             isAvailable = true;
 			packetsToSend = new Queue<NetPacket>();                           //Inicjalizacja buforów na komunikaty
 			packetsReceived = new Queue<NetPacket>();
-			senderThread = new Thread(SenderThread);
-			listenerThread = new Thread(ListenerThread);
             this.interfaceNumber = interfaceNumber;
             
 			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.9"), GetPortNumber(this.interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
@@ -219,7 +217,10 @@ namespace MetronomySimul
 			this.targetEndPoint = targetEndPoint;
 
             //Uruchomienie wątków
-			senderThread.Start();
+            senderThread = new Thread(SenderThread);
+            listenerThread = new Thread(ListenerThread);
+
+            senderThread.Start();
 			listenerThread.Start();
 
 			//Sorki, mam chłopaka
