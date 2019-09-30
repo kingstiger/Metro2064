@@ -193,8 +193,15 @@ namespace MetronomySimul
                             }
                             //przestawiamy flagę oczekiwania na ACK po PINGU (go home, ur drunk)
                         }
-                        else
+                        else if (toProcess.data.Substring(0,3).Equals(Operations.OFFER))
                         {
+                        foreach(NetInterface ni in interfaces)
+                        {
+                            if(ni.GetTargetEndpoint().Address.ToString().Equals(toProcess.sender_IP.Address.ToString()))
+                            {
+                                RemoveOfferedInterface(ni.interfaceNumber);
+                            }
+                        }
                             //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
 
                         }
