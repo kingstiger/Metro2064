@@ -16,7 +16,7 @@ namespace MetronomySimul
 	sealed class Watchdog : NetInterface
 	{
         private List<NetInterface> interfaces = new List<NetInterface>();
-        private List<int> offeredInterfacesNumbers;   //Lista interfejsów zaoferowanych do innych metronomów. Para IPAddress oferenta oraz numer naszego interfejsu
+        private List<int> offeredInterfacesNumbers;   //Lista interfejsów zaoferowanych do innych metronomów.
         public List<NetPacket> connectedInterfaces = new List<NetPacket>(); //Gotowe do wysłania NetPacket-y (do wstawienia PING albo DISCOVER)
         private IPEndPoint multicastReceivingEndpoint;
         private Mutex offeredMutex;
@@ -91,6 +91,7 @@ namespace MetronomySimul
                                     {
                                         connectedInterfaces.RemoveAt(indexToDelete);
                                     }
+                                    RemoveOfferedInterface(x.interfaceNumber);
                                     x.TerminateConnection();
                                 }
                                 
@@ -144,12 +145,8 @@ namespace MetronomySimul
                     {
                         foreach (NetInterface x in interfaces)
                         {
-                            if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
+                            if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x))))
                             {
-                            if(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x) + 1))
-                            {
-                                offeredInterfacesNumbers.RemoveAt(interfaces.IndexOf(x) + 1);
-                            }
                                 x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
                                 connectedInterfaces.Add(new NetPacket(
                                 toProcess.receiver_IP,
