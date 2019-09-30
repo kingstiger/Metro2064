@@ -68,7 +68,7 @@ namespace MetronomySimul
                                 {
                                     foreach(NetPacket y in connectedInterfaces)
                                     {
-                                        if(y.sender_port == x.GetPortNumber(x.GetInterfaceNumber()))
+                                        if (y.sender_port == x.GetPortNumber(x.interfaceNumber))
                                         {
                                             connectedInterfaces.Remove(y);
                                         }
@@ -139,11 +139,18 @@ namespace MetronomySimul
                             if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
                             {
                                 x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
-                                connectedInterfaces.Add(new NetPacket(toProcess, $"{interfaces.IndexOf(x) + 1}"));
+                            connectedInterfaces.Add(new NetPacket(
+                                toProcess.receiver_IP,
+                                toProcess.sender_IP,
+                                toProcess.receiver_port,
+                                toProcess.sender_port,
+                                0,
+                                Operations.PING,
+                                toProcess.data
+                                ));
                                 //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
                                 NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
                                 AddAwaitingToSendPacket(packetToSend);
-                                End:
                                 break;
                             }
                         }

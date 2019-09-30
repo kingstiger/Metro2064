@@ -18,7 +18,7 @@ namespace MetronomySimul
         private Watchdog watchdog;
         private double wychylenie, frequency = 0; //wychylenie <-1, 1>, czestotliwosc (0Hz, 1Hz>
         private int kierunek; //kierunek {-1, 1}
-        private Thread thread, conThread;
+        private Thread thread;
         private string[] connectionsConsole = new string[4];
         public Form1()
         {
@@ -40,47 +40,8 @@ namespace MetronomySimul
             
             thread = new Thread(PendulumThread);
             thread.Start();
-            conThread = new Thread(ConnectionsThread);
-            conThread.Start();
         }
 
-        private void ConnectionsThread()
-        {
-            while (true)
-            {
-                if (IsHandleCreated)
-                {
-                    Invoke
-                        (new Action(() =>
-                        {
-                            activeConnections.Text += "\r\n";
-                        }));
-                    foreach (NetPacket x in watchdog.connectedInterfaces)
-                    {
-                        connectionsConsole[watchdog.connectedInterfaces.IndexOf(x)] = $"IP Adrress: {x.receiver_IP}; Port: {x.receiver_port}; Time since last PING: {watchdog.seconds_elapsed_since_last_pings} ";
-
-                    }
-                    for (int i = 0; i < connectionsConsole.Length; i++)
-                    {
-                        if (connectionsConsole[i] != "")
-
-                            Invoke
-                            (new Action(() =>
-                            {
-                                activeConnections.Text += connectionsConsole[i];
-                            }));
-                        else
-                            Invoke
-                            (new Action(() =>
-                            {
-                                activeConnections.Text += "Niepołączony";
-                            }));
-
-                    }
-                }
-                Thread.Sleep(1000);
-            }
-        }
 
         private void PendulumThread()
         {
@@ -149,7 +110,6 @@ namespace MetronomySimul
         {
             try
             {
-                conThread.Abort();
                 thread.Abort();
                 watchdog.StopThreads();
                 Application.Exit();
