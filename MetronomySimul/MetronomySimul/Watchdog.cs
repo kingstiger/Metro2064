@@ -22,7 +22,7 @@ namespace MetronomySimul
         private Mutex offeredMutex;
         public int seconds_elapsed_since_last_pings;
         private int[] seconds_to_disconnect;
-//private Thread cyclic;
+        private Thread cyclic;
 
         public Watchdog(int amount_of_interfaces, Form1 form) : base(0, form)
 		{
@@ -37,8 +37,8 @@ namespace MetronomySimul
            }
             netClient.Client.EnableBroadcast = true;
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
-            //cyclic = new Thread(Cyclic);
-            //cyclic.Start();
+            cyclic = new Thread(Cyclic);
+            cyclic.Start();
             seconds_to_disconnect = new int[amount_of_interfaces + 1];
         }
 
