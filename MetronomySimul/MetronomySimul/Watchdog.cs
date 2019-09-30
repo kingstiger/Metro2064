@@ -64,28 +64,29 @@ namespace MetronomySimul
                                     x.AddAwaitingToSendPacket(x.MakeSyncPacket(oscilation_info)); 
                                 }
 
+                                foreach (NetPacket y in connectedInterfaces)
+                                {
+                                    if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
+                                    {
+                                        cyclic = new NetPacket(y);
+                                        cyclic.data = "";
+                                        cyclic.operation = Operations.PING;
+                                        AddAwaitingToSendPacket(cyclic);
+                                    }
+                                }
+
                                 if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
                                 {
                                     foreach(NetPacket y in connectedInterfaces)
                                     {
-                                        if (y.sender_port == x.GetPortNumber(x.interfaceNumber))
+                                        if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
                                         {
                                             connectedInterfaces.Remove(y);
                                         }
                                     }
                                     x.TerminateConnection();
                                 }
-                                foreach (NetPacket y in connectedInterfaces)
-                                {
-                                    if (y.data == $"{interfaces.IndexOf(x) + 1}")
-                                    {
-                                        cyclic = new NetPacket(y);
-                                        cyclic.data = "";
-                                        cyclic.operation = Operations.PING;
-                                        AddAwaitingToSendPacket(cyclic);
-                                        seconds_to_disconnect[interfaces.IndexOf(x) + 1] = 10;
-                                    }
-                                }
+                                
                             }
                         }
                     }
@@ -139,7 +140,7 @@ namespace MetronomySimul
                             if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
                             {
                                 x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
-                            connectedInterfaces.Add(new NetPacket(
+                                connectedInterfaces.Add(new NetPacket(
                                 toProcess.receiver_IP,
                                 toProcess.sender_IP,
                                 toProcess.receiver_port,
@@ -173,7 +174,7 @@ namespace MetronomySimul
                             {
                                 if (y.receiver_port == toProcess.sender_port)
                                 {
-                                    seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 10;
+                                    seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 20;
                                 }
                             }
                             //przestawiamy flagę oczekiwania na ACK po PINGU (go home, ur drunk)

@@ -66,6 +66,11 @@ namespace MetronomySimul
 			}
 		}
 
+
+        public IPEndPoint GetTargetEndpoint()
+        {
+            return this.targetEndPoint;
+        }
 		/// <summary>
 		/// Wątek wysyłający komunikaty w sieć 
 		/// </summary>
