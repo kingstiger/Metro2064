@@ -66,7 +66,6 @@ namespace MetronomySimul
 
                                 if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
                                 {
-                                    x.TerminateConnection();
                                     foreach(NetPacket y in connectedInterfaces)
                                     {
                                         if(y.sender_port == x.GetPortNumber(x.GetInterfaceNumber()))
@@ -74,6 +73,7 @@ namespace MetronomySimul
                                             connectedInterfaces.Remove(y);
                                         }
                                     }
+                                    x.TerminateConnection();
                                 }
                                 foreach (NetPacket y in connectedInterfaces)
                                 {
@@ -235,7 +235,7 @@ namespace MetronomySimul
                 receivedPacket = new NetPacket();
                 receivedBytes = netClient.Receive(ref multicastReceivingEndpoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-                if (receivedPacket.sender_IP != localEndPoint.Address)
+                if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()))
                 {
                     this.form.DisplayOnLog("WATCHDOG>#\tReceived: " + receivedPacket.operation + " from " + receivedPacket.sender_IP);
                     AddReceivedPacket(receivedPacket);

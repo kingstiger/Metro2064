@@ -41,7 +41,7 @@ namespace MetronomySimul
 			listenerThread = new Thread(ListenerThread);
             this.interfaceNumber = interfaceNumber;
             
-			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.9"), GetPortNumber(this.interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
+			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.8"), GetPortNumber(this.interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
 		}
 
@@ -58,7 +58,7 @@ namespace MetronomySimul
                 receivedPacket = new NetPacket();
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-                if (receivedPacket.sender_IP != localEndPoint.Address && receivedPacket.sender_port != GetPortNumber(0))
+                if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()) && receivedPacket.sender_port != GetPortNumber(0))
                 {
                     packetsReceived.Enqueue(receivedPacket);
                     Task.Run(async () => await Process());
