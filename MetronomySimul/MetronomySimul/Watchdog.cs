@@ -82,7 +82,7 @@ namespace MetronomySimul
                                     x.AddAwaitingToSendPacket(x.MakeSyncPacket(oscilation_info)); 
                                 }
 
-                                if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
+/*                               if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
                                 {
                                     int indexToDelete = -1;
                                     foreach(NetPacket y in connectedInterfaces)
@@ -99,7 +99,7 @@ namespace MetronomySimul
                                     }
                                     RemoveOfferedInterface(x.interfaceNumber);
                                     x.TerminateConnection();
-                                }
+                                }*/
                                 
                             }
                         }
@@ -177,7 +177,15 @@ namespace MetronomySimul
                     {
                         NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.PING);
                         AddAwaitingToSendPacket(packetToSend);
+
+                    foreach (NetPacket y in connectedInterfaces)
+                    {
+                        if (y.receiver_port == toProcess.sender_port)
+                        {
+                            seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 20;
+                        }
                     }
+                }
 
                     //Na pakiet ACK odpowiadamy.... HMMMMMM to zależu NIEEEEEEEEEEEEEEEEE
                     if (toProcess.operation == Operations.ACK)
@@ -197,9 +205,12 @@ namespace MetronomySimul
                         {
                         foreach(NetInterface ni in interfaces)
                         {
-                            if(ni.GetTargetEndpoint().Address.ToString().Equals(toProcess.sender_IP.Address.ToString()))
+                            if (!ni.IsAvailable())
                             {
-                                RemoveOfferedInterface(ni.interfaceNumber);
+                                if (ni.GetTargetEndpoint().Address.ToString().Equals(toProcess.sender_IP.Address.ToString()))
+                                {
+                                    RemoveOfferedInterface(ni.interfaceNumber);
+                                }
                             }
                         }
                             //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
