@@ -55,25 +55,27 @@ namespace MetronomySimul
                     NetPacket cyclic;
                     if (connectedInterfaces.Count > 0)
                     {
+                        
+
                         foreach (NetInterface x in interfaces)
                         {
+                            foreach (NetPacket y in connectedInterfaces)
+                            {
+                                if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
+                                {
+                                    cyclic = new NetPacket(y);
+                                    cyclic.data = "";
+                                    cyclic.operation = Operations.PING;
+                                    AddAwaitingToSendPacket(cyclic);
+                                }
+                            }
+
                             if (!x.IsAvailable())
                             {
                                 if (OscillatorUpdator.oscillation_info_domestic.Count > 0)
                                 {
                                     Tuple<double, double> oscilation_info = OscillatorUpdator.GetOscInfoDomestic();
                                     x.AddAwaitingToSendPacket(x.MakeSyncPacket(oscilation_info)); 
-                                }
-
-                                foreach (NetPacket y in connectedInterfaces)
-                                {
-                                    if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
-                                    {
-                                        cyclic = new NetPacket(y);
-                                        cyclic.data = "";
-                                        cyclic.operation = Operations.PING;
-                                        AddAwaitingToSendPacket(cyclic);
-                                    }
                                 }
 
                                 if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
