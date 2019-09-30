@@ -233,8 +233,15 @@ namespace MetronomySimul
 		{
             //Wyłączenie wątków
 #pragma warning disable CS0618 // Type or member is obsolete
-            senderThread.Suspend();
-            listenerThread.Suspend();
+            try
+            {
+                senderThread.Abort();
+                listenerThread.Abort();
+            }
+            catch (ThreadAbortException)
+            {; }
+
+
 #pragma warning restore CS0618 // Type or member is obsolete
 
             //Czyszczenie pól
