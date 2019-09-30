@@ -49,6 +49,7 @@ namespace MetronomySimul
             seconds_elapsed_since_last_pings = 0;
             while (true)
             {
+                
                 if (seconds_elapsed_since_last_pings > 10)
                 {
                     NetPacket cyclic;
@@ -145,6 +146,10 @@ namespace MetronomySimul
                         {
                             if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x)+1)))
                             {
+                            if(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x) + 1))
+                            {
+                                offeredInterfacesNumbers.RemoveAt(interfaces.IndexOf(x) + 1);
+                            }
                                 x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
                                 connectedInterfaces.Add(new NetPacket(
                                 toProcess.receiver_IP,
@@ -295,17 +300,19 @@ namespace MetronomySimul
         private void RemoveOfferedInterface(int offeredInterfaceNumber)
         {
             offeredMutex.WaitOne();
-
+            int indexToDelete = -1;
             foreach (int n in offeredInterfacesNumbers)
             {
                 if (n == offeredInterfaceNumber)
                 {
-                    offeredInterfacesNumbers.Remove(n);
+                    indexToDelete = offeredInterfacesNumbers.IndexOf(n);
                     this.form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " is no longer offered");
                 }
             }
-
-
+            if(indexToDelete != -1)
+            {
+                offeredInterfacesNumbers.RemoveAt(indexToDelete);
+            }
 
             offeredMutex.ReleaseMutex();
         }
