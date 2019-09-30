@@ -40,6 +40,10 @@ namespace MetronomySimul
             cyclic = new Thread(Cyclic);
             cyclic.Start();
             seconds_to_disconnect = new int[amount_of_interfaces + 1];
+            for(int i = 0; i < amount_of_interfaces + 1; i++)
+            {
+                seconds_to_disconnect[i] = 20;
+            }
         }
 
         //cyklicznie wysyła PING oraz DISCOVER
