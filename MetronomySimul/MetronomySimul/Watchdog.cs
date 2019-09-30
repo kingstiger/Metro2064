@@ -77,12 +77,18 @@ namespace MetronomySimul
 
                                 if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
                                 {
+                                    int indexToDelete = -1;
                                     foreach(NetPacket y in connectedInterfaces)
                                     {
                                         if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
                                         {
-                                            connectedInterfaces.Remove(y);
+                                            //connectedInterfaces.Remove(y);
+                                            indexToDelete = connectedInterfaces.IndexOf(y);
                                         }
+                                    }
+                                    if (indexToDelete != -1)
+                                    {
+                                        connectedInterfaces.RemoveAt(indexToDelete);
                                     }
                                     x.TerminateConnection();
                                 }
