@@ -88,10 +88,6 @@ namespace MetronomySimul
                             if (!x.IsAvailable())
                             {
 
-                                {
-                                    x.sendSyncPacket(OscillatorUpdator.GetOscInfoDomestic());
-                                }
-
                                 /*                               if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
                                                                 {
                                                                     int indexToDelete = -1;
