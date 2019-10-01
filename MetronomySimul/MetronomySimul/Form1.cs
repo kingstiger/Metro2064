@@ -45,63 +45,60 @@ namespace MetronomySimul
 
         private void PendulumThread()
         {
+
+
+            //tu będzie oscylacja
+            //nie wiem czy to zadziała
+            //jak bedzie GUI to sie przekonamy
             while (true)
             {
-                
-                //tu będzie oscylacja
-                //nie wiem czy to zadziała
-                //jak bedzie GUI to sie przekonamy
-                while (true)
+                if (OscillatorUpdator.oscillation_info_foreign.Count > 0)
                 {
-                    if (OscillatorUpdator.oscillation_info_foreign.Count > 0)
-                    {
-                        Tuple<double, double> rcvd_info;
-                        rcvd_info = OscillatorUpdator.GetOscInfoForeign();
-                        wychylenie = (wychylenie + rcvd_info.Item1) / 2;
-                        frequency = (frequency + rcvd_info.Item2) / 2;
-                    }
-                    Thread.Sleep((int)(1000 / (frequency * 1000)));
-                    wychylenie += (0.001 * kierunek);
-                    if (wychylenie > 1 || wychylenie < -1)
-                    {
-                        kierunek *= -1;
-                        if (wychylenie > 1)
-                            wychylenie = 1;
-                        else wychylenie = -1;
-                        OscillatorUpdator.GiveOscInfoDomestic(new Tuple<double, double>(wychylenie, frequency));
-                    }
-                    else
-                    {
-                        //obsluga w oknie, domyslnie dwa progress bary - jeden normalny "przyklejony" to drugiego
-                        //drugi z ustawionym rightToLeft = true, yes, whtvr
+                    Tuple<double, double> rcvd_info;
+                    rcvd_info = OscillatorUpdator.GetOscInfoForeign();
+                    wychylenie = (wychylenie + rcvd_info.Item1) / 2;
+                    frequency = (frequency + rcvd_info.Item2) / 2;
+                }
+                Thread.Sleep((int)(1000 / (frequency * 1000)));
+                wychylenie += (0.001 * kierunek);
+                if (wychylenie > 1 || wychylenie < -1)
+                {
+                    kierunek *= -1;
+                    if (wychylenie > 1)
+                        wychylenie = 1;
+                    else wychylenie = -1;
+                    Tuple<double, double> infoToGive = new Tuple<double, double>(wychylenie, frequency);
+                    OscillatorUpdator.GiveOscInfoDomestic(infoToGive);
+                }
+                else
+                {
+                    //obsluga w oknie, domyslnie dwa progress bary - jeden normalny "przyklejony" to drugiego
+                    //drugi z ustawionym rightToLeft = true, yes, whtvr
 
-                        if (wychylenie > 0)
+                    if (wychylenie > 0)
+                    {
+                        if (IsHandleCreated)
                         {
-                            if (IsHandleCreated)
+                            Invoke
+                            (new Action(() =>
                             {
-                                Invoke
-                                (new Action(() =>
-                                {
-                                    progressBar1.Value = (int)(wychylenie * 1000);
-                                    textBox1.Text = wychylenie.ToString();
-                                }));
-                            }
+                                progressBar1.Value = (int)(wychylenie * 1000);
+                                textBox1.Text = wychylenie.ToString();
+                            }));
                         }
-                        if (wychylenie < 0)
-                        {
-                            if (IsHandleCreated)
-                            {
-                                Invoke
-                                (new Action(() =>
-                                {
-                                    progressBar2.Value = (-1) * (int)(wychylenie * 1000);
-                                    textBox1.Text = wychylenie.ToString();
-                                }));
-                            }
-                        }
-
                     }
-
+                    if (wychylenie < 0)
+                    {
+                        if (IsHandleCreated)
+                        {
+                            Invoke
+                            (new Action(() =>
+                            {
+                                progressBar2.Value = (-1) * (int)(wychylenie * 1000);
+                                textBox1.Text = wychylenie.ToString();
+                            }));
+                        }
+                    }
                 }
             }
         }

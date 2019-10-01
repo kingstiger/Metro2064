@@ -1,10 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Net.Sockets;
+﻿using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-
-using System;
 /*
 Klasa Watchdog dziedziczy po klasie NetInterface i jest odpowiedzialna za znajdywanie i wiązanie nowych metronomów
 z wolnymi interfejsami. Dodatkowo Watchdog ma cyklicznie sprawdza czy metronomy są "połączone". Jeżeli nie, to zwalnia
@@ -13,8 +11,8 @@ interfejs sieciowy do którego nie przychodzą żadne odpowiedzi
 
 namespace MetronomySimul
 {
-	sealed class Watchdog : NetInterface
-	{
+    internal sealed class Watchdog : NetInterface
+    {
         private List<NetInterface> interfaces = new List<NetInterface>();
         private List<int> offeredInterfacesNumbers;   //Lista interfejsów zaoferowanych do innych metronomów.
         public List<NetPacket> connectedInterfaces = new List<NetPacket>(); //Gotowe do wysłania NetPacket-y (do wstawienia PING albo DISCOVER)
@@ -25,22 +23,22 @@ namespace MetronomySimul
         private Thread cyclic;
 
         public Watchdog(int amount_of_interfaces, Form1 form) : base(0, form)
-		{
+        {
             multicastReceivingEndpoint = new IPEndPoint(IPAddress.Any, GetPortNumber(0));
 
             offeredMutex = new Mutex();
             offeredInterfacesNumbers = new List<int>();
 
-           for (int i = 1; i <= amount_of_interfaces; i++)
-           {
+            for (int i = 1; i <= amount_of_interfaces; i++)
+            {
                 interfaces.Add(new NetInterface(i, form));
-           }
+            }
             netClient.Client.EnableBroadcast = true;
             SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
             cyclic = new Thread(Cyclic);
             cyclic.Start();
             seconds_to_disconnect = new int[amount_of_interfaces + 1];
-            for(int i = 0; i < amount_of_interfaces + 1; i++)
+            for (int i = 0; i < amount_of_interfaces + 1; i++)
             {
                 seconds_to_disconnect[i] = 20;
             }
@@ -53,19 +51,32 @@ namespace MetronomySimul
             seconds_elapsed_since_last_pings = 0;
             while (true)
             {
-                
+                Tuple<double, double> osc_info = null;
+                if (OscillatorUpdator.oscillation_info_domestic.Count > 0)
+                {
+                    osc_info = OscillatorUpdator.GetOscInfoDomestic();
+                }
+                if (connectedInterfaces.Count > 0)
+                {
+                    foreach (NetInterface x in interfaces)
+                    {
+                        if (!x.IsAvailable())
+                        {
+                            x.sendSyncPacket(osc_info);
+                        }
+                    }
+                }
+
                 if (seconds_elapsed_since_last_pings > 10)
                 {
                     NetPacket cyclic;
                     if (connectedInterfaces.Count > 0)
                     {
-                        
-
                         foreach (NetInterface x in interfaces)
                         {
                             foreach (NetPacket y in connectedInterfaces)
                             {
-                                if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
+                                if (x.GetTargetEndpoint() != null && y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
                                 {
                                     cyclic = new NetPacket(y);
                                     cyclic.data = "";
@@ -76,31 +87,30 @@ namespace MetronomySimul
 
                             if (!x.IsAvailable())
                             {
-                                if (OscillatorUpdator.oscillation_info_domestic.Count > 0)
+
                                 {
-                                    Tuple<double, double> oscilation_info = OscillatorUpdator.GetOscInfoDomestic();
-                                    x.AddAwaitingToSendPacket(x.MakeSyncPacket(oscilation_info)); 
+                                    x.sendSyncPacket(OscillatorUpdator.GetOscInfoDomestic());
                                 }
 
-/*                               if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
-                                {
-                                    int indexToDelete = -1;
-                                    foreach(NetPacket y in connectedInterfaces)
-                                    {
-                                        if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
-                                        {
-                                            //connectedInterfaces.Remove(y);
-                                            indexToDelete = connectedInterfaces.IndexOf(y);
-                                        }
-                                    }
-                                    if (indexToDelete != -1)
-                                    {
-                                        connectedInterfaces.RemoveAt(indexToDelete);
-                                    }
-                                    RemoveOfferedInterface(x.interfaceNumber);
-                                    x.TerminateConnection();
-                                }*/
-                                
+                                /*                               if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
+                                                                {
+                                                                    int indexToDelete = -1;
+                                                                    foreach(NetPacket y in connectedInterfaces)
+                                                                    {
+                                                                        if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
+                                                                        {
+                                                                            //connectedInterfaces.Remove(y);
+                                                                            indexToDelete = connectedInterfaces.IndexOf(y);
+                                                                        }
+                                                                    }
+                                                                    if (indexToDelete != -1)
+                                                                    {
+                                                                        connectedInterfaces.RemoveAt(indexToDelete);
+                                                                    }
+                                                                    RemoveOfferedInterface(x.interfaceNumber);
+                                                                    x.TerminateConnection();
+                                                                }*/
+
                             }
                         }
                     }
@@ -110,7 +120,8 @@ namespace MetronomySimul
                         AddAwaitingToSendPacket(cyclic);
                     }
                     seconds_elapsed_since_last_pings = 0;
-                } else
+                }
+                else
                 {
                     seconds_elapsed_since_last_pings++;
                     for (int i = 1; i < seconds_to_disconnect.Length; i++)
@@ -124,59 +135,59 @@ namespace MetronomySimul
 
         protected override void ProcessingThread()
         {
-            
-                //jak są jakieś otrzymane pakiety to je przetwarza
-                if (packetsReceived.Count > 0)
+
+            //jak są jakieś otrzymane pakiety to je przetwarza
+            if (packetsReceived.Count > 0)
+            {
+                NetPacket toProcess = GetReceivedPacket();
+
+                //Na pakiet DISCOVER odpowiadamy OFFER
+                if (toProcess.operation == Operations.DISCOVER)
                 {
-                    NetPacket toProcess = GetReceivedPacket();
-
-                    //Na pakiet DISCOVER odpowiadamy OFFER
-                    if (toProcess.operation == Operations.DISCOVER)
+                    foreach (NetInterface x in interfaces)
                     {
-                        foreach (NetInterface x in interfaces)
+                        if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x) + 1)))
                         {
-                            if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x) + 1)))
-                            {
-                                NetPacket packetToSend = new NetPacket(toProcess, localEndPoint.Address, x.GetInterfaceNumber().ToString());
-                                AddOfferedInterface(interfaces.IndexOf(x) + 1);
-                                AddAwaitingToSendPacket(packetToSend);
-                                break;
-                            }
-
-                        }
-                    }
-
-                    //Na pakiet OFFER odpowiadamy ACK
-                    if (toProcess.operation == Operations.OFFER)
-                    {
-                        foreach (NetInterface x in interfaces)
-                        {
-                            if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x))))
-                            {
-                                x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
-                                connectedInterfaces.Add(new NetPacket(
-                                toProcess.receiver_IP,
-                                toProcess.sender_IP,
-                                toProcess.receiver_port,
-                                toProcess.sender_port,
-                                0,
-                                Operations.PING,
-                                toProcess.data
-                                ));
-                                //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
-                                NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
-                                AddAwaitingToSendPacket(packetToSend);
-                                break;
-                            }
+                            NetPacket packetToSend = new NetPacket(toProcess, localEndPoint.Address, x.GetInterfaceNumber().ToString());
+                            AddOfferedInterface(interfaces.IndexOf(x) + 1);
+                            AddAwaitingToSendPacket(packetToSend);
+                            break;
                         }
 
                     }
+                }
 
-                    //Na pakiet PING odpowiadamy ACK
-                    if (toProcess.operation == Operations.PING)
+                //Na pakiet OFFER odpowiadamy ACK
+                if (toProcess.operation == Operations.OFFER)
+                {
+                    foreach (NetInterface x in interfaces)
                     {
-                        NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.PING);
-                        AddAwaitingToSendPacket(packetToSend);
+                        if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x))))
+                        {
+                            x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
+                            connectedInterfaces.Add(new NetPacket(
+                            toProcess.receiver_IP,
+                            toProcess.sender_IP,
+                            toProcess.receiver_port,
+                            toProcess.sender_port,
+                            0,
+                            Operations.PING,
+                            toProcess.data
+                            ));
+                            //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
+                            NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
+                            AddAwaitingToSendPacket(packetToSend);
+                            break;
+                        }
+                    }
+
+                }
+
+                //Na pakiet PING odpowiadamy ACK
+                if (toProcess.operation == Operations.PING)
+                {
+                    NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.PING);
+                    AddAwaitingToSendPacket(packetToSend);
 
                     foreach (NetPacket y in connectedInterfaces)
                     {
@@ -187,23 +198,23 @@ namespace MetronomySimul
                     }
                 }
 
-                    //Na pakiet ACK odpowiadamy.... HMMMMMM to zależu NIEEEEEEEEEEEEEEEEE
-                    if (toProcess.operation == Operations.ACK)
+                //Na pakiet ACK odpowiadamy.... HMMMMMM to zależu NIEEEEEEEEEEEEEEEEE
+                if (toProcess.operation == Operations.ACK)
+                {
+                    if (toProcess.data == Operations.PING)
                     {
-                        if (toProcess.data == Operations.PING)
+                        foreach (NetPacket y in connectedInterfaces)
                         {
-                            foreach (NetPacket y in connectedInterfaces)
+                            if (y.receiver_port == toProcess.sender_port)
                             {
-                                if (y.receiver_port == toProcess.sender_port)
-                                {
-                                    seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 20;
-                                }
+                                seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 20;
                             }
-                            //przestawiamy flagę oczekiwania na ACK po PINGU (go home, ur drunk)
                         }
-                        else if (toProcess.data.Substring(0,3).Equals(Operations.OFFER))
-                        {
-                        foreach(NetInterface ni in interfaces)
+                        //przestawiamy flagę oczekiwania na ACK po PINGU (go home, ur drunk)
+                    }
+                    else if (toProcess.data.Substring(0, 3).Equals(Operations.OFFER))
+                    {
+                        foreach (NetInterface ni in interfaces)
                         {
                             if (!ni.IsAvailable())
                             {
@@ -213,18 +224,18 @@ namespace MetronomySimul
                                 }
                             }
                         }
-                            //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
-
-                        }
-                    }
-
-                    if (toProcess.operation == Operations.NACK)
-                    {
+                        //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
 
                     }
                 }
 
-            
+                if (toProcess.operation == Operations.NACK)
+                {
+
+                }
+            }
+
+
         }
 
         public override void StopThreads()
@@ -238,17 +249,18 @@ namespace MetronomySimul
                     {
                         n.StopThreads();
                     }
-                    catch(ThreadStateException ex)
+                    catch (ThreadStateException ex)
                     {
                         continue;
                     }
                 }
                 //cyclic.Abort();
-            } catch(ThreadStateException ex)
+            }
+            catch (ThreadStateException ex)
             {
                 throw ex;
             }
-}
+        }
 
         protected override void SenderThread()
         {
@@ -307,12 +319,12 @@ namespace MetronomySimul
         /// <param name="bidderAddress">-> Adres oferenta interfejsu sieciowego</param>
         /// <param name="offeredInterfaceNumber">-> Numer oferowanego interfejsu</param>
         private void AddOfferedInterface(int offeredInterfaceNumber)
-            {
-                offeredMutex.WaitOne();
-                offeredInterfacesNumbers.Add(offeredInterfaceNumber);
-                form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " offered. Awaiting connection...");
-                offeredMutex.ReleaseMutex();
-            }
+        {
+            offeredMutex.WaitOne();
+            offeredInterfacesNumbers.Add(offeredInterfaceNumber);
+            form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " offered. Awaiting connection...");
+            offeredMutex.ReleaseMutex();
+        }
 
         /// <summary>
         /// Usuwa interfejs z listy zaoferowanych interfejsów o podanym numerze
@@ -330,7 +342,7 @@ namespace MetronomySimul
                     this.form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " is no longer offered");
                 }
             }
-            if(indexToDelete != -1)
+            if (indexToDelete != -1)
             {
                 offeredInterfacesNumbers.RemoveAt(indexToDelete);
             }
@@ -347,13 +359,12 @@ namespace MetronomySimul
             foreach (NetInterface x in interfaces)
             {
                 if (x.IsAvailable() == true)
+                {
                     return true;
+                }
             }
 
             return false;
         }
-
-
-
     }
 }

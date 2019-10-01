@@ -39,7 +39,7 @@ namespace MetronomySimul
 			packetsReceived = new Queue<NetPacket>();
             this.interfaceNumber = interfaceNumber;
             
-			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.9"), GetPortNumber(this.interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
+			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.8"), GetPortNumber(this.interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
 		}
 
@@ -133,16 +133,16 @@ namespace MetronomySimul
 				}
 
                 //jak są jakieś informacje do wysłania, to je wsadza do kolejki do wysłania
-                if(OscillatorUpdator.oscillation_info_domestic.Count > 0)
-                {
-                    System.Tuple<double, double> oscilation_info = OscillatorUpdator.GetOscInfoDomestic();
-                    AddAwaitingToSendPacket(MakeSyncPacket(oscilation_info)); //tu nie jestem pewien co z nr sekwencyjnym
-
-                }
-            
         }
 
-		
+        /// <summary>
+        /// Metoda wywoływana przez Watchdog dla każdego NetInterface'u, w celu wysłania pakietu SYNC do połączonego metronomu
+        /// </summary>
+        /// <param name="oscilation_info"></param>
+		public void sendSyncPacket(System.Tuple<double, double> oscilation_info)
+        {
+            AddAwaitingToSendPacket(MakeSyncPacket(oscilation_info));
+        }
         /// <summary>
         /// Tworzenie pakietu do synchronizacji z powiązanym na danym interfejsie metronomem
         /// </summary>
