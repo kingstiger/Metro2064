@@ -11,7 +11,7 @@ interfejs sieciowy do którego nie przychodzą żadne odpowiedzi
 
 namespace MetronomySimul
 {
-    internal sealed class Watchdog : NetInterface
+    sealed class Watchdog : NetInterface
     {
         private List<NetInterface> interfaces = new List<NetInterface>();
         private List<int> offeredInterfacesNumbers;   //Lista interfejsów zaoferowanych do innych metronomów.
@@ -155,6 +155,33 @@ namespace MetronomySimul
                         }
 
                     }
+                }
+
+                //Na pakiet OFFER odpowiadamy ACK
+                if (toProcess.operation == Operations.OFFER)
+                {
+                    foreach (NetInterface x in interfaces)
+                    {
+                        if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x))))
+                        {
+                            x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
+                            connectedInterfaces.Add(new NetPacket(
+                            toProcess.receiver_IP,
+                            toProcess.sender_IP,
+                            toProcess.receiver_port,
+                            toProcess.sender_port,
+                            0,
+                            Operations.PING,
+                            toProcess.data
+                            ));
+                            //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
+                            NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
+                            AddAwaitingToSendPacket(packetToSend);
+                            break;
+                        }
+                    }
+
+
                 }
 
                 //Na pakiet OFFER odpowiadamy ACK
@@ -366,5 +393,6 @@ namespace MetronomySimul
 
             return false;
         }
+
     }
 }
