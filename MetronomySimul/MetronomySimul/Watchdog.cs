@@ -1,394 +1,68 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-/*
-Klasa Watchdog dziedziczy po klasie NetInterface i jest odpowiedzialna za znajdywanie i wiązanie nowych metronomów
-z wolnymi interfejsami. Dodatkowo Watchdog ma cyklicznie sprawdza czy metronomy są "połączone". Jeżeli nie, to zwalnia
-interfejs sieciowy do którego nie przychodzą żadne odpowiedzi
-*/
 
 namespace MetronomySimul
 {
-    sealed class Watchdog : NetInterface
+    class WNetInterface
     {
-        private List<NetInterface> interfaces = new List<NetInterface>();
-        private List<int> offeredInterfacesNumbers;   //Lista interfejsów zaoferowanych do innych metronomów.
-        public List<NetPacket> connectedInterfaces = new List<NetPacket>(); //Gotowe do wysłania NetPacket-y (do wstawienia PING albo DISCOVER)
-        private IPEndPoint multicastReceivingEndpoint;
-        private Mutex offeredMutex;
-        public int seconds_elapsed_since_last_pings;
-        private int[] seconds_to_disconnect;
-        private Thread cyclic;
+        public NetInterface eth;   //Interfejs sieciowy
+        public bool isOffered;     //Flaga oznaczająca, czy interfejs został zaoferowany, ale jeszcze nie utworzono z nim połączenia
+        public int secondsElapsedLastPing;
 
-        public Watchdog(int amount_of_interfaces, Form1 form) : base(0, form)
+        public WNetInterface(int interfaceNumber, Form1 form)
         {
-            multicastReceivingEndpoint = new IPEndPoint(IPAddress.Any, GetPortNumber(0));
-
-            offeredMutex = new Mutex();
-            offeredInterfacesNumbers = new List<int>();
-
-            for (int i = 1; i <= amount_of_interfaces; i++)
-            {
-                interfaces.Add(new NetInterface(i, form));
-            }
-            netClient.Client.EnableBroadcast = true;
-            SetConnection(new IPEndPoint(IPAddress.Broadcast, GetPortNumber(0)));
-            cyclic = new Thread(Cyclic);
-            cyclic.Start();
-            seconds_to_disconnect = new int[amount_of_interfaces + 1];
-            for (int i = 0; i < amount_of_interfaces + 1; i++)
-            {
-                seconds_to_disconnect[i] = 20;
-            }
+            eth = new NetInterface(interfaceNumber, form);
+            isOffered = false;
+            secondsElapsedLastPing = -1;    //Dopiero po nawiązaniu połączenia i wysłaniu pierwszego pinga uzupełniamy o pole o wartość większą/równą zero.
         }
 
-        //cyklicznie wysyła PING oraz DISCOVER
-        private void Cyclic()
+        public bool IsAvaiable() => eth.IsAvailable() && !isOffered;
+        public void SetConnection(IPEndPoint targetEndPoint) //Łączy wybrany interfejs z wybranym endpointem
         {
+            isOffered = false;
+            eth.SetConnection(targetEndPoint);
+        }
+        public void TerminateConnection()   //Rozłącza wybrany interfejs
+        {
+            isOffered = false;
+            eth.TerminateConnection();
+        }
+        public IPEndPoint GetLocalEndpoint() => eth.localEndPoint;
+        public IPEndPoint GetTargetEndpoint() => eth.targetEndPoint;
+    }
+    class Watchdog
+    {
+        private List<WNetInterface> interfaces = new List<WNetInterface>();
+        public Form1 form;                                                  //Uchwyt na okno
 
-            seconds_elapsed_since_last_pings = 0;
-            while (true)
+        private UdpClient netClient;                                        //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
+        private IPEndPoint localEndPoint;
+        private IPEndPoint targetEndPoint;
+        private Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
+        private Mutex sendMutex, receiveMutex, interfaceMutex;              //Muteksy dla kolejek komnikatów oraz listy interfejsów
+        protected Thread senderThread, listenerThread, cyclicThread;	    //Uchwyty na wątki do wysyłania i odbierania danych, oraz cyklicznego dodawania danych do wysłania przez watchdoga
+
+        public Watchdog(int numberOfInterfaces, Form1 form)
+        {
+            this.form = form;
+
+            sendMutex = new Mutex();
+            receiveMutex = new Mutex();
+            interfaceMutex = new Mutex();
+            packetsToSend = new Queue<NetPacket>();             //Inicjalizacja buforów na komunikaty
+            packetsReceived = new Queue<NetPacket>();
+
+            localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.3"), 8080);   //Watchdog ma numer portu 8080
+            netClient = new UdpClient(localEndPoint);	                            //Inicjalizacja klienta protokołu UDP
+
+            for (int i = 1; i <= numberOfInterfaces; ++i) //Inicjalizacja interfejsów siecowych
             {
-                Tuple<double, double> osc_info = null;
-                if (OscillatorUpdator.oscillation_info_domestic.Count > 0)
-                {
-                    osc_info = OscillatorUpdator.GetOscInfoDomestic();
-                }
-                if (connectedInterfaces.Count > 0)
-                {
-                    foreach (NetInterface x in interfaces)
-                    {
-                        if (!x.IsAvailable())
-                        {
-                            x.sendSyncPacket(osc_info);
-                        }
-                    }
-                }
-
-                if (seconds_elapsed_since_last_pings > 10)
-                {
-                    NetPacket cyclic;
-                    if (connectedInterfaces.Count > 0)
-                    {
-                        foreach (NetInterface x in interfaces)
-                        {
-                            foreach (NetPacket y in connectedInterfaces)
-                            {
-                                if (x.GetTargetEndpoint() != null && y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
-                                {
-                                    cyclic = new NetPacket(y);
-                                    cyclic.data = "";
-                                    cyclic.operation = Operations.PING;
-                                    AddAwaitingToSendPacket(cyclic);
-                                }
-                            }
-
-                            if (!x.IsAvailable())
-                            {
-
-                                /*                               if (seconds_to_disconnect[interfaces.IndexOf(x)+1] <= 0)
-                                                                {
-                                                                    int indexToDelete = -1;
-                                                                    foreach(NetPacket y in connectedInterfaces)
-                                                                    {
-                                                                        if (y.receiver_IP.ToString().Equals(x.GetTargetEndpoint().Address.ToString()))
-                                                                        {
-                                                                            //connectedInterfaces.Remove(y);
-                                                                            indexToDelete = connectedInterfaces.IndexOf(y);
-                                                                        }
-                                                                    }
-                                                                    if (indexToDelete != -1)
-                                                                    {
-                                                                        connectedInterfaces.RemoveAt(indexToDelete);
-                                                                    }
-                                                                    RemoveOfferedInterface(x.interfaceNumber);
-                                                                    x.TerminateConnection();
-                                                                }*/
-
-                            }
-                        }
-                    }
-                    else
-                    {
-                        cyclic = MakeDiscoverPacket();
-                        AddAwaitingToSendPacket(cyclic);
-                    }
-                    seconds_elapsed_since_last_pings = 0;
-                }
-                else
-                {
-                    seconds_elapsed_since_last_pings++;
-                    for (int i = 1; i < seconds_to_disconnect.Length; i++)
-                    {
-                        seconds_to_disconnect[i]--;
-                    }
-                    Thread.Sleep(1000);
-                }
+                interfaces.Add(new WNetInterface(i, form)); //Tworzy nowy interfejs sieciowy i przypisuje mu numer
             }
         }
-
-        protected override void ProcessingThread()
-        {
-
-            //jak są jakieś otrzymane pakiety to je przetwarza
-            if (packetsReceived.Count > 0)
-            {
-                NetPacket toProcess = GetReceivedPacket();
-
-                //Na pakiet DISCOVER odpowiadamy OFFER
-                if (toProcess.operation == Operations.DISCOVER)
-                {
-                    foreach (NetInterface x in interfaces)
-                    {
-                        if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x) + 1)))
-                        {
-                            NetPacket packetToSend = new NetPacket(toProcess, localEndPoint.Address, x.GetInterfaceNumber().ToString());
-                            AddOfferedInterface(interfaces.IndexOf(x) + 1);
-                            AddAwaitingToSendPacket(packetToSend);
-                            break;
-                        }
-
-                    }
-                }
-
-                //Na pakiet OFFER odpowiadamy ACK
-                if (toProcess.operation == Operations.OFFER)
-                {
-                    foreach (NetInterface x in interfaces)
-                    {
-                        if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x))))
-                        {
-                            x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
-                            connectedInterfaces.Add(new NetPacket(
-                            toProcess.receiver_IP,
-                            toProcess.sender_IP,
-                            toProcess.receiver_port,
-                            toProcess.sender_port,
-                            0,
-                            Operations.PING,
-                            toProcess.data
-                            ));
-                            //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
-                            NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
-                            AddAwaitingToSendPacket(packetToSend);
-                            break;
-                        }
-                    }
-
-
-                }
-
-                //Na pakiet OFFER odpowiadamy ACK
-                if (toProcess.operation == Operations.OFFER)
-                {
-                    foreach (NetInterface x in interfaces)
-                    {
-                        if (x.IsAvailable() && !(offeredInterfacesNumbers.Contains(interfaces.IndexOf(x))))
-                        {
-                            x.SetConnection(new IPEndPoint(toProcess.sender_IP, GetPortNumber(ParseToInt(toProcess.data))));
-                            connectedInterfaces.Add(new NetPacket(
-                            toProcess.receiver_IP,
-                            toProcess.sender_IP,
-                            toProcess.receiver_port,
-                            toProcess.sender_port,
-                            0,
-                            Operations.PING,
-                            toProcess.data
-                            ));
-                            //Odpowiadając ACK na komunikat OFFER przesyłamy w polu danych nazwę operacji która zostaje potwierdzona (OFFER) i numer interfejsu na którym zestawiliśmy połączenie
-                            NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.OFFER + ";" + (interfaces.IndexOf(x) + 1).ToString());
-                            AddAwaitingToSendPacket(packetToSend);
-                            break;
-                        }
-                    }
-
-                }
-
-                //Na pakiet PING odpowiadamy ACK
-                if (toProcess.operation == Operations.PING)
-                {
-                    NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK, Operations.PING);
-                    AddAwaitingToSendPacket(packetToSend);
-
-                    foreach (NetPacket y in connectedInterfaces)
-                    {
-                        if (y.receiver_port == toProcess.sender_port)
-                        {
-                            seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 20;
-                        }
-                    }
-                }
-
-                //Na pakiet ACK odpowiadamy.... HMMMMMM to zależu NIEEEEEEEEEEEEEEEEE
-                if (toProcess.operation == Operations.ACK)
-                {
-                    if (toProcess.data == Operations.PING)
-                    {
-                        foreach (NetPacket y in connectedInterfaces)
-                        {
-                            if (y.receiver_port == toProcess.sender_port)
-                            {
-                                seconds_to_disconnect[connectedInterfaces.IndexOf(y)] = 20;
-                            }
-                        }
-                        //przestawiamy flagę oczekiwania na ACK po PINGU (go home, ur drunk)
-                    }
-                    else if (toProcess.data.Substring(0, 3).Equals(Operations.OFFER))
-                    {
-                        foreach (NetInterface ni in interfaces)
-                        {
-                            if (!ni.IsAvailable())
-                            {
-                                if (ni.GetTargetEndpoint().Address.ToString().Equals(toProcess.sender_IP.Address.ToString()))
-                                {
-                                    RemoveOfferedInterface(ni.interfaceNumber);
-                                }
-                            }
-                        }
-                        //w przeciwnym przypadku ACK otrzymujemy po wysłaniu pakietu OFFER
-
-                    }
-                }
-
-                if (toProcess.operation == Operations.NACK)
-                {
-
-                }
-            }
-
-
-        }
-
-        public override void StopThreads()
-        {
-            try
-            {
-                base.StopThreads();
-                foreach (NetInterface n in interfaces)
-                {
-                    try
-                    {
-                        n.StopThreads();
-                    }
-                    catch (ThreadStateException ex)
-                    {
-                        continue;
-                    }
-                }
-                //cyclic.Abort();
-            }
-            catch (ThreadStateException ex)
-            {
-                throw ex;
-            }
-        }
-
-        protected override void SenderThread()
-        {
-            while (true)
-            {
-                if (packetsToSend.Count > 0)
-                {
-                    NetPacket toSendPacket = new NetPacket();
-                    toSendPacket = GetAwaitingToSendPacket();
-                    this.form.DisplayOnLog("WATCHDOG>#\tSending: " + toSendPacket.operation + " to " + toSendPacket.receiver_IP);
-                    byte[] bytesToSend = NetPacket.TranslateMsgToSend(toSendPacket);
-                    netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, toSendPacket.receiver_port));
-                }
-            }
-        }
-
-        protected override void ListenerThread()
-        {
-            byte[] receivedBytes;
-            NetPacket receivedPacket = new NetPacket();
-
-            while (true)
-            {
-                receivedPacket = new NetPacket();
-                receivedBytes = netClient.Receive(ref multicastReceivingEndpoint);
-                receivedPacket.ReadReceivedMsg(receivedBytes);
-                if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()))
-                {
-                    this.form.DisplayOnLog("WATCHDOG>#\tReceived: " + receivedPacket.operation + " from " + receivedPacket.sender_IP);
-                    AddReceivedPacket(receivedPacket);
-                    Task.Run(async () => await Process());
-                }
-            }
-        }
-        private Task Process()
-        {
-            var result = Task.Run(() => ProcessingThread());
-            return result;
-        }
-        /// <summary>
-        /// Tworzenie pakietu do wysłania komunikatu DISCOVER
-        /// </summary>
-        /// <param name="oscilation_info"></param>
-        /// <returns></returns>
-        private NetPacket MakeDiscoverPacket()
-        {
-            NetPacket discover = new NetPacket(
-                        localEndPoint.Address, IPAddress.Broadcast, localEndPoint.Port, GetPortNumber(0),
-                        0, Operations.DISCOVER, "");
-            return discover;
-        }
-
-        /// <summary>
-        /// Dodaje parę adres oferenta i numer oferowanego interfejsu do listy zaoferowanych interfejsów
-        /// </summary>
-        /// <param name="bidderAddress">-> Adres oferenta interfejsu sieciowego</param>
-        /// <param name="offeredInterfaceNumber">-> Numer oferowanego interfejsu</param>
-        private void AddOfferedInterface(int offeredInterfaceNumber)
-        {
-            offeredMutex.WaitOne();
-            offeredInterfacesNumbers.Add(offeredInterfaceNumber);
-            form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " offered. Awaiting connection...");
-            offeredMutex.ReleaseMutex();
-        }
-
-        /// <summary>
-        /// Usuwa interfejs z listy zaoferowanych interfejsów o podanym numerze
-        /// </summary>
-        /// <param name="offeredInterfaceNumber"></param>
-        private void RemoveOfferedInterface(int offeredInterfaceNumber)
-        {
-            offeredMutex.WaitOne();
-            int indexToDelete = -1;
-            foreach (int n in offeredInterfacesNumbers)
-            {
-                if (n == offeredInterfaceNumber)
-                {
-                    indexToDelete = offeredInterfacesNumbers.IndexOf(n);
-                    this.form.DisplayOnLog("WATCHDOG>#\tInterface " + offeredInterfaceNumber + " is no longer offered");
-                }
-            }
-            if (indexToDelete != -1)
-            {
-                offeredInterfacesNumbers.RemoveAt(indexToDelete);
-            }
-
-            offeredMutex.ReleaseMutex();
-        }
-
-        /// <summary>
-        /// Zwraca wartosć true jeżeli metronom ma co najmniej jedno zestawione połączenie
-        /// </summary>
-        /// <returns></returns>
-        private bool AmIConnectedSomewhere()
-        {
-            foreach (NetInterface x in interfaces)
-            {
-                if (x.IsAvailable() == true)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
     }
 }

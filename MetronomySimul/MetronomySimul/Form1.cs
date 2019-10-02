@@ -13,7 +13,7 @@ namespace MetronomySimul
 {
     public partial class Form1 : Form
     {
-        //watchdog powinien miec metode ze daje jej info 
+        //watchdog powinien miec metode ze daje jej info
 
         private Watchdog watchdog;
         private double wychylenie, frequency = 0; //wychylenie <-1, 1>, czestotliwosc (0Hz, 1Hz>
@@ -108,7 +108,7 @@ namespace MetronomySimul
             try
             {
                 thread.Abort();
-                watchdog.StopThreads();
+                //watchdog.StopThreads();
                 Application.Exit();
                 Environment.Exit(0);
             } catch (ThreadAbortException)
