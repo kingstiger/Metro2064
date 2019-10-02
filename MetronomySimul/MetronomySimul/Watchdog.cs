@@ -12,27 +12,52 @@ namespace MetronomySimul
         public NetInterface eth;   //Interfejs sieciowy
         public bool isOffered;     //Flaga oznaczająca, czy interfejs został zaoferowany, ale jeszcze nie utworzono z nim połączenia
         public int secondsElapsedLastPing;
+        private Form1 form;         //Uchwyt na okno
 
         public WNetInterface(int interfaceNumber, Form1 form)
         {
+            this.form = form;
             eth = new NetInterface(interfaceNumber, form);
             isOffered = false;
             secondsElapsedLastPing = -1;    //Dopiero po nawiązaniu połączenia i wysłaniu pierwszego pinga uzupełniamy o pole o wartość większą/równą zero.
         }
 
-        public bool IsAvaiable() => eth.IsAvailable() && !isOffered;
+        //Przydatne gettery
+        public IPEndPoint GetLocalEndpoint() => eth.localEndPoint;
+        public IPEndPoint GetTargetEndpoint() => eth.targetEndPoint;
+
+        //Oferowanie interfejsów i nawiązywanie/przerywanie połączeń
+        public bool IsAvaiable() => eth.IsConnected() && !isOffered;
+        public void OfferInterface(WNetInterface wNet, IPEndPoint targetEndpoint)
+        {
+            wNet.isOffered = true;
+            secondsElapsedLastPing = -1;
+            //wyślij do kolejki rzeczy do wysłania....
+
+            form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " offered. Awaiting ACK...");
+        }
+        public void StopOfferingInterface(WNetInterface wNet)
+        {
+            wNet.isOffered = false;
+            secondsElapsedLastPing = -1;
+
+            this.form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " is no longer offered");
+        }
         public void SetConnection(IPEndPoint targetEndPoint) //Łączy wybrany interfejs z wybranym endpointem
         {
             isOffered = false;
+
             eth.SetConnection(targetEndPoint);
         }
         public void TerminateConnection()   //Rozłącza wybrany interfejs
         {
             isOffered = false;
+            secondsElapsedLastPing = -1;
+
             eth.TerminateConnection();
         }
-        public IPEndPoint GetLocalEndpoint() => eth.localEndPoint;
-        public IPEndPoint GetTargetEndpoint() => eth.targetEndPoint;
+
+        //
     }
     class Watchdog
     {
@@ -46,18 +71,18 @@ namespace MetronomySimul
         private Mutex sendMutex, receiveMutex, interfaceMutex;              //Muteksy dla kolejek komnikatów oraz listy interfejsów
         protected Thread senderThread, listenerThread, cyclicThread;	    //Uchwyty na wątki do wysyłania i odbierania danych, oraz cyklicznego dodawania danych do wysłania przez watchdoga
 
-        public Watchdog(int numberOfInterfaces, Form1 form)
+        public Watchdog(string localAddress, int numberOfInterfaces, Form1 form)
         {
             this.form = form;
 
             sendMutex = new Mutex();
             receiveMutex = new Mutex();
             interfaceMutex = new Mutex();
-            packetsToSend = new Queue<NetPacket>();             //Inicjalizacja buforów na komunikaty
+            packetsToSend = new Queue<NetPacket>();
             packetsReceived = new Queue<NetPacket>();
 
-            localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.3"), 8080);   //Watchdog ma numer portu 8080
-            netClient = new UdpClient(localEndPoint);	                            //Inicjalizacja klienta protokołu UDP
+            localEndPoint = new IPEndPoint(IPAddress.Parse(localAddress), 8080);
+            netClient = new UdpClient(localEndPoint);
 
             for (int i = 1; i <= numberOfInterfaces; ++i) //Inicjalizacja interfejsów siecowych
             {

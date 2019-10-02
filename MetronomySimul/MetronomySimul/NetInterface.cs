@@ -12,13 +12,13 @@ namespace MetronomySimul
 {
     class NetInterface
 	{
-		protected UdpClient netClient;                                        //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
-        protected IPEndPoint localEndPoint; 
-        private IPEndPoint targetEndPoint;                                    //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
-		protected Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
-        protected Mutex sendMutex, receiveMutex;                              //Muteksy dla kolejek komnikatów
-        private bool isAvailable { get; set; }                                //Oznacza, czy interfejs nie ma już połączenia
-		protected Thread senderThread, listenerThread;	  //Uchwyty na wątki
+		protected UdpClient netClient;                                      //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
+        public IPEndPoint localEndPoint; 
+        public IPEndPoint targetEndPoint;                                   //Instancje klasy IPEndPoint zawierają pary adres IPv4 oraz numer portu endpointu nadawcy i odbiorcy
+		protected Queue<NetPacket> packetsToSend, packetsReceived;          //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
+        protected Mutex sendMutex, receiveMutex;                            //Muteksy dla kolejek komnikatów
+        private bool isConnected;                                           //Oznacza, czy interfejs nie ma już połączenia
+		protected Thread senderThread, listenerThread;	                    //Uchwyty na wątki
         private int seq_number;
 
         public Form1 form; //Uchwyt na okno
@@ -28,19 +28,19 @@ namespace MetronomySimul
         /// Tworzy nowy inerfejs sieciowy o numerze zgodnym z interfaceNumber
         /// </summary>
         /// <param name="interfaceNumber">  numer interfejsu w celu dobrania odpowiedniego portu </param>
-		public NetInterface(int interfaceNumber, Form1 form)                              //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
+		public NetInterface(int interfaceNumber, Form1 form)    //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
 		{
             this.form = form;
             seq_number = 0;
             sendMutex = new Mutex();
             receiveMutex = new Mutex();
-            isAvailable = true;
-			packetsToSend = new Queue<NetPacket>();                           //Inicjalizacja buforów na komunikaty
+            isConnected = false;
+			packetsToSend = new Queue<NetPacket>();             //Inicjalizacja buforów na komunikaty
 			packetsReceived = new Queue<NetPacket>();
             this.interfaceNumber = interfaceNumber;
             
-			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.3"), GetPortNumber(this.interfaceNumber));      //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
-			netClient = new UdpClient(localEndPoint);											//Inicjalizacja klienta protokołu UDP
+			localEndPoint = new IPEndPoint(IPAddress.Parse("192.168.1.3"), 8080 + interfaceNumber); //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
+			netClient = new UdpClient(localEndPoint);	//Inicjalizacja klienta protokołu UDP
 		}
 
         /// <summary> 
@@ -56,7 +56,7 @@ namespace MetronomySimul
                 receivedPacket = new NetPacket();
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
-                if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()) && receivedPacket.sender_port != GetPortNumber(0))
+                if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()) && receivedPacket.sender_port != 8080)
                 {
                     packetsReceived.Enqueue(receivedPacket);
                     Task.Run(async () => await Process());
@@ -205,11 +205,11 @@ namespace MetronomySimul
             sendMutex.ReleaseMutex();
         }
 
-        public int GetPortNumber(int interfaceNumber) => 8080 + interfaceNumber;
+        public int GetPortNumber() => localEndPoint.Port;
 
         public int GetInterfaceNumber() => localEndPoint.Port - 8080;
 
-        public bool IsAvailable() => isAvailable;
+        public bool IsConnected() => isConnected;
 
 	    public void SetConnection(IPEndPoint targetEndPoint)
 		{
@@ -217,14 +217,10 @@ namespace MetronomySimul
 			this.targetEndPoint = targetEndPoint;
 
             //Uruchomienie wątków
-            senderThread = new Thread(SenderThread);
-            listenerThread = new Thread(ListenerThread);
-
-            senderThread.Start();
-			listenerThread.Start();
+            StartThreads();
 
 			//Sorki, mam chłopaka
-			isAvailable = false;
+			isConnected = true;
 
             //Log
             this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t has connected to " + targetEndPoint.Address.ToString());
@@ -233,17 +229,7 @@ namespace MetronomySimul
 		public void TerminateConnection()
 		{
             //Wyłączenie wątków
-#pragma warning disable CS0618 // Type or member is obsolete
-            try
-            {
-                senderThread.Abort();
-                listenerThread.Abort();
-            }
-            catch (ThreadAbortException)
-            {; }
-
-
-#pragma warning restore CS0618 // Type or member is obsolete
+            StopThreads();
 
             //Czyszczenie pól
             packetsToSend.Clear();
@@ -251,12 +237,29 @@ namespace MetronomySimul
 			targetEndPoint = null;
 
 			//Od dzisiaj jestem wolna
-			isAvailable = true;
+			isConnected = false;
 
             //Log
             this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t has disconected from another metronome");
         }
-        virtual public void StopThreads()
+
+        virtual public void StartThreads()  //Startuje wątki interfejsu sieciowego
+        {
+            try
+            {
+                senderThread = new Thread(SenderThread);
+                listenerThread = new Thread(ListenerThread);
+
+                senderThread.Start();
+                listenerThread.Start();
+            }
+            catch(ThreadStartException ex)
+            {
+                throw ex;
+            }
+        }
+
+        virtual public void StopThreads()       //Zabija wątki interfejsu sieciowego
         {
             try
             {
