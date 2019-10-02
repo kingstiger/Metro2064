@@ -14,10 +14,10 @@ namespace MetronomySimul
         public int secondsElapsedLastPing;
         private Form1 form;         //Uchwyt na okno
 
-        public WNetInterface(int interfaceNumber, Form1 form)
+        public WNetInterface(string localAddress, int interfaceNumber, Form1 form)
         {
             this.form = form;
-            eth = new NetInterface(interfaceNumber, form);
+            eth = new NetInterface(localAddress, interfaceNumber, form);
             isOffered = false;
             secondsElapsedLastPing = -1;    //Dopiero po nawiązaniu połączenia i wysłaniu pierwszego pinga uzupełniamy o pole o wartość większą/równą zero.
         }
@@ -27,7 +27,7 @@ namespace MetronomySimul
         public IPEndPoint GetTargetEndpoint() => eth.targetEndPoint;
 
         //Oferowanie interfejsów i nawiązywanie/przerywanie połączeń
-        public bool IsAvaiable() => eth.IsConnected() && !isOffered;
+        public bool IsAvaiable() => !eth.IsConnected() && !isOffered;
         public void OfferInterface(WNetInterface wNet, IPEndPoint targetEndpoint)
         {
             wNet.isOffered = true;
@@ -86,7 +86,7 @@ namespace MetronomySimul
 
             for (int i = 1; i <= numberOfInterfaces; ++i) //Inicjalizacja interfejsów siecowych
             {
-                interfaces.Add(new WNetInterface(i, form)); //Tworzy nowy interfejs sieciowy i przypisuje mu numer
+                interfaces.Add(new WNetInterface(localAddress, i, form)); //Tworzy nowy interfejs sieciowy i przypisuje mu numer
             }
         }
     }
