@@ -30,16 +30,23 @@
         {
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.CLOSEAPP = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.progressBar2 = new System.Windows.Forms.ProgressBar();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.activeConnections = new System.Windows.Forms.TextBox();
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.Log = new System.Windows.Forms.RichTextBox();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.CLOSEAPP = new System.Windows.Forms.Button();
+            this.checkBox1 = new System.Windows.Forms.CheckBox();
+            this.textBoxIP1 = new System.Windows.Forms.TextBox();
+            this.textBoxIP2 = new System.Windows.Forms.TextBox();
+            this.checkBox2 = new System.Windows.Forms.CheckBox();
+            this.textBoxIP3 = new System.Windows.Forms.TextBox();
+            this.checkBox3 = new System.Windows.Forms.CheckBox();
+            this.textBoxIP4 = new System.Windows.Forms.TextBox();
+            this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
@@ -72,6 +79,18 @@
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Parametry symulacji";
             this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // CLOSEAPP
+            // 
+            this.CLOSEAPP.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.CLOSEAPP.ForeColor = System.Drawing.Color.Red;
+            this.CLOSEAPP.Location = new System.Drawing.Point(865, 6);
+            this.CLOSEAPP.Name = "CLOSEAPP";
+            this.CLOSEAPP.Size = new System.Drawing.Size(75, 23);
+            this.CLOSEAPP.TabIndex = 4;
+            this.CLOSEAPP.Text = "Zamknij";
+            this.CLOSEAPP.UseVisualStyleBackColor = false;
+            this.CLOSEAPP.Click += new System.EventHandler(this.CLOSEAPP_Click);
             // 
             // textBox1
             // 
@@ -107,7 +126,14 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.activeConnections);
+            this.tabPage2.Controls.Add(this.textBoxIP4);
+            this.tabPage2.Controls.Add(this.checkBox4);
+            this.tabPage2.Controls.Add(this.textBoxIP3);
+            this.tabPage2.Controls.Add(this.checkBox3);
+            this.tabPage2.Controls.Add(this.textBoxIP2);
+            this.tabPage2.Controls.Add(this.checkBox2);
+            this.tabPage2.Controls.Add(this.textBoxIP1);
+            this.tabPage2.Controls.Add(this.checkBox1);
             this.tabPage2.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
@@ -116,15 +142,6 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Aktywne połączenia";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // activeConnections
-            // 
-            this.activeConnections.Location = new System.Drawing.Point(144, 108);
-            this.activeConnections.Multiline = true;
-            this.activeConnections.Name = "activeConnections";
-            this.activeConnections.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.activeConnections.Size = new System.Drawing.Size(630, 269);
-            this.activeConnections.TabIndex = 0;
             // 
             // tabPage3
             // 
@@ -158,17 +175,77 @@
             this.splitter1.TabIndex = 1;
             this.splitter1.TabStop = false;
             // 
-            // CLOSEAPP
+            // checkBox1
             // 
-            this.CLOSEAPP.BackColor = System.Drawing.SystemColors.HotTrack;
-            this.CLOSEAPP.ForeColor = System.Drawing.Color.Red;
-            this.CLOSEAPP.Location = new System.Drawing.Point(865, 6);
-            this.CLOSEAPP.Name = "CLOSEAPP";
-            this.CLOSEAPP.Size = new System.Drawing.Size(75, 23);
-            this.CLOSEAPP.TabIndex = 4;
-            this.CLOSEAPP.Text = "Zamknij";
-            this.CLOSEAPP.UseVisualStyleBackColor = false;
-            this.CLOSEAPP.Click += new System.EventHandler(this.CLOSEAPP_Click);
+            this.checkBox1.AutoCheck = false;
+            this.checkBox1.AutoSize = true;
+            this.checkBox1.Location = new System.Drawing.Point(324, 231);
+            this.checkBox1.Name = "checkBox1";
+            this.checkBox1.Size = new System.Drawing.Size(57, 17);
+            this.checkBox1.TabIndex = 0;
+            this.checkBox1.Text = "ETH 1";
+            this.checkBox1.UseVisualStyleBackColor = true;
+            // 
+            // textBoxIP1
+            // 
+            this.textBoxIP1.Location = new System.Drawing.Point(387, 231);
+            this.textBoxIP1.Name = "textBoxIP1";
+            this.textBoxIP1.Size = new System.Drawing.Size(223, 20);
+            this.textBoxIP1.TabIndex = 1;
+            // 
+            // textBoxIP2
+            // 
+            this.textBoxIP2.Location = new System.Drawing.Point(387, 257);
+            this.textBoxIP2.Name = "textBoxIP2";
+            this.textBoxIP2.Size = new System.Drawing.Size(223, 20);
+            this.textBoxIP2.TabIndex = 3;
+            // 
+            // checkBox2
+            // 
+            this.checkBox2.AutoCheck = false;
+            this.checkBox2.AutoSize = true;
+            this.checkBox2.Location = new System.Drawing.Point(324, 257);
+            this.checkBox2.Name = "checkBox2";
+            this.checkBox2.Size = new System.Drawing.Size(57, 17);
+            this.checkBox2.TabIndex = 2;
+            this.checkBox2.Text = "ETH 2";
+            this.checkBox2.UseVisualStyleBackColor = true;
+            // 
+            // textBoxIP3
+            // 
+            this.textBoxIP3.Location = new System.Drawing.Point(387, 283);
+            this.textBoxIP3.Name = "textBoxIP3";
+            this.textBoxIP3.Size = new System.Drawing.Size(223, 20);
+            this.textBoxIP3.TabIndex = 5;
+            // 
+            // checkBox3
+            // 
+            this.checkBox3.AutoCheck = false;
+            this.checkBox3.AutoSize = true;
+            this.checkBox3.Location = new System.Drawing.Point(324, 283);
+            this.checkBox3.Name = "checkBox3";
+            this.checkBox3.Size = new System.Drawing.Size(57, 17);
+            this.checkBox3.TabIndex = 4;
+            this.checkBox3.Text = "ETH 3";
+            this.checkBox3.UseVisualStyleBackColor = true;
+            // 
+            // textBoxIP4
+            // 
+            this.textBoxIP4.Location = new System.Drawing.Point(387, 309);
+            this.textBoxIP4.Name = "textBoxIP4";
+            this.textBoxIP4.Size = new System.Drawing.Size(223, 20);
+            this.textBoxIP4.TabIndex = 7;
+            // 
+            // checkBox4
+            // 
+            this.checkBox4.AutoCheck = false;
+            this.checkBox4.AutoSize = true;
+            this.checkBox4.Location = new System.Drawing.Point(324, 309);
+            this.checkBox4.Name = "checkBox4";
+            this.checkBox4.Size = new System.Drawing.Size(57, 17);
+            this.checkBox4.TabIndex = 6;
+            this.checkBox4.Text = "ETH 4";
+            this.checkBox4.UseVisualStyleBackColor = true;
             // 
             // Form1
             // 
@@ -201,8 +278,15 @@
         public System.Windows.Forms.ProgressBar progressBar1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.TextBox activeConnections;
         public System.Windows.Forms.RichTextBox Log;
         private System.Windows.Forms.Button CLOSEAPP;
+        private System.Windows.Forms.TextBox textBoxIP4;
+        private System.Windows.Forms.CheckBox checkBox4;
+        private System.Windows.Forms.TextBox textBoxIP3;
+        private System.Windows.Forms.CheckBox checkBox3;
+        private System.Windows.Forms.TextBox textBoxIP2;
+        private System.Windows.Forms.CheckBox checkBox2;
+        private System.Windows.Forms.TextBox textBoxIP1;
+        private System.Windows.Forms.CheckBox checkBox1;
     }
 }

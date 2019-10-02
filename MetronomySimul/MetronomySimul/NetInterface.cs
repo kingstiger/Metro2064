@@ -169,10 +169,14 @@ namespace MetronomySimul
         /// <returns></returns>
         public NetPacket MakeSyncPacket(System.Tuple<double, double> oscilation_info)
         {
-            NetPacket sync = new NetPacket(
-                        localEndPoint.Address, targetEndPoint.Address, localEndPoint.Port, targetEndPoint.Port,
-                        seq_number, Operations.SYNC, oscilation_info.Item1.ToString() + ";" + oscilation_info.Item2.ToString() + ";");
-            return sync;
+            return new NetPacket(
+                        localEndPoint.Address,
+                        targetEndPoint.Address,
+                        localEndPoint.Port,
+                        targetEndPoint.Port,
+                        seq_number,
+                        Operations.SYNC,
+                        oscilation_info.Item1.ToString() + ";" + oscilation_info.Item2.ToString() + ";");
         }
 
         /// <summary>

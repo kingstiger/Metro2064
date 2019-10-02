@@ -110,7 +110,7 @@ namespace MetronomySimul
             try
             {
                 thread.Abort();
-                //watchdog.StopThreads();
+                watchdog.StopThreads();
                 Application.Exit();
                 Environment.Exit(0);
             } catch (ThreadAbortException)
@@ -126,6 +126,39 @@ namespace MetronomySimul
         {
 
         }
+        
+        private void SetCheckBoxAndIp(string ipAddress, int interfaceNumber)
+        {
+            try
+            {
+                switch (interfaceNumber)
+                {
+                    case 1:
+                        checkBox1.Invoke(new Action(() => checkBox1.Checked = !checkBox1.Checked));
+                        if (checkBox1.Checked) textBoxIP1.Invoke(new Action(() => textBoxIP1.Text = ipAddress));
+                        else textBoxIP1.Invoke(new Action(() => textBoxIP1.Text = ""));
+                        break;
+                    case 2:
+                        checkBox2.Invoke(new Action(() => checkBox2.Checked = !checkBox2.Checked));
+                        if (checkBox2.Checked) textBoxIP2.Invoke(new Action(() => textBoxIP2.Text = ipAddress));
+                        else textBoxIP2.Invoke(new Action(() => textBoxIP2.Text = ""));
+                        break;
+                    case 3:
+                        checkBox3.Invoke(new Action(() => checkBox3.Checked = !checkBox3.Checked));
+                        if (checkBox3.Checked) textBoxIP3.Invoke(new Action(() => textBoxIP3.Text = ipAddress));
+                        else textBoxIP3.Invoke(new Action(() => textBoxIP3.Text = ""));
+                        break;
+                    case 4:
+                        checkBox4.Invoke(new Action(() => checkBox4.Checked = !checkBox4.Checked));
+                        if (checkBox4.Checked) textBoxIP4.Invoke(new Action(() => textBoxIP4.Text = ipAddress));
+                        else textBoxIP4.Invoke(new Action(() => textBoxIP4.Text = ""));
+                        break;
+                }
+            } catch(Exception)
+            {
+                ;
+            }
+        }
 
         public void DisplayOnLog(string text)
         {
@@ -133,7 +166,7 @@ namespace MetronomySimul
             {
                 Log.Invoke(new Action(() => Log.AppendText("\n" + text)));
             }
-            catch (Exception e) {; }
+            catch (Exception) {; }
                 
         }
        

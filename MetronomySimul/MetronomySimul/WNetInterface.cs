@@ -77,6 +77,11 @@ namespace MetronomySimul
         public bool DoTerminate() => (++triedPings >= 3) ? true : false;
 
         /// <summary>
+        /// Resetuje licznik wysłanych pingów
+        /// </summary>
+        public void ResetPingCount() => triedPings = 0;
+
+        /// <summary>
         /// Zeruje licznik sekund od ostatniego pingu
         /// </summary>
         public void ZeroPing() => secondsElapsedLastPing = 0;
