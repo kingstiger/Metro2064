@@ -20,6 +20,7 @@ namespace MetronomySimul
         public bool isOffered;     //Flaga oznaczająca, czy interfejs został zaoferowany, ale jeszcze nie utworzono z nim połączenia
         private int secondsElapsedLastPing;
         private Form1 form;        //Uchwyt na okno
+        private int triedPings;
 
         public WNetInterface(string localAddress, int interfaceNumber, Form1 form)
         {
@@ -67,13 +68,13 @@ namespace MetronomySimul
         /// Zwięsza licznik sekund od ostatniego pinga o 1. Jeżeli czas od ostatniego pinga przekroczy 10 sekund metoda zwraca wartość logiczną false
         /// </summary>
         /// <returns></returns>
-        public bool IncrementLastPing() 
-        {
-            if (++secondsElapsedLastPing >= 10)
-                return true;
-            else
-                return false;
-        }
+        public bool IncrementLastPing() => (++secondsElapsedLastPing >= 10) ? true : false;
+        
+        /// <summary>
+        /// Stwierdza, czy trzeba kończyć połączenie (po 3 pingach bez odpowiedzi)
+        /// </summary>
+        /// <returns></returns>
+        public bool DoTerminate() => (++triedPings >= 3) ? true : false;
 
         /// <summary>
         /// Zeruje licznik sekund od ostatniego pingu
