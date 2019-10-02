@@ -3,13 +3,14 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
-/*
-Klasa NetInterface jest implementacją interfejsu sieciowego metronomu. Klasa ta posiada swoją instancję klienta UDP, oraz metody
-pozwalające na komunikację z innymi interfejsami. Schemat datagramu wykorzystywanego przez tą klasę znajduję się w klasie NetPacket.
-*/
 
 namespace MetronomySimul
 {
+    /// <summary>
+    /// Klasa NetInterface jest implementacją interfejsu sieciowego metronomu. Klasa ta posiada swoją instancję klienta UDP, 
+    /// oraz metody pozwalające na komunikację z innymi interfejsami.
+    /// Schemat datagramu wykorzystywanego przez tą klasę znajduję się w klasie NetPacket.
+    /// </summary>
     class NetInterface
 	{
 		protected UdpClient netClient;                                      //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
@@ -25,17 +26,19 @@ namespace MetronomySimul
         public int interfaceNumber; //Numer interfejsu
 
         /// <summary>
-        /// Tworzy nowy inerfejs sieciowy o numerze zgodnym z interfaceNumber
+        /// Tworzy nową instancję interfejsu sieciowego do wymieniania danych oscylacji
         /// </summary>
-        /// <param name="interfaceNumber">  numer interfejsu w celu dobrania odpowiedniego portu </param>
-		public NetInterface(string localAddress, int interfaceNumber, Form1 form)    //interfaceNumber oznacza numer interfejsu w celu dobrania odpowiedniego portu
+        /// <param name="localAddress">Lokalny adres IP karty sieciowej</param>
+        /// <param name="interfaceNumber">Na podstawie numeru interfejsu zostaje przypisany mu nr portu</param>
+        /// <param name="form">Uchwyt na okno w celu wyświetlania logu</param>
+		public NetInterface(string localAddress, int interfaceNumber, Form1 form)
 		{
             this.form = form;
             seq_number = 0;
             sendMutex = new Mutex();
             receiveMutex = new Mutex();
             isConnected = false;
-			packetsToSend = new Queue<NetPacket>();             //Inicjalizacja buforów na komunikaty
+			packetsToSend = new Queue<NetPacket>(); //Inicjalizacja buforów na komunikaty
 			packetsReceived = new Queue<NetPacket>();
             this.interfaceNumber = interfaceNumber;
             
@@ -43,10 +46,46 @@ namespace MetronomySimul
 			netClient = new UdpClient(localEndPoint);	//Inicjalizacja klienta protokołu UDP
 		}
 
+
+        //Wątki====================================================================================
+        /// <summary>
+        /// Uruchamia wątki nasłuchujące i wysyłające dane
+        /// </summary>
+        private void StartThreads()
+        {
+            try
+            {
+                senderThread = new Thread(SenderThread);
+                listenerThread = new Thread(ListenerThread);
+
+                senderThread.Start();
+                listenerThread.Start();
+            }
+            catch (System.Exception e)
+            {
+                this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t exception caught while starting the threads: " + e.ToString());
+            }
+        }
+
+        /// <summary>
+        /// Zatrzymuje wątki nasłuchujące i wysyłające dane
+        /// </summary>
+        private void StopThreads()
+        {
+            try
+            {
+                senderThread.Abort();
+                listenerThread.Abort();
+            }
+            catch (System.Exception e)
+            {
+                this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t exception caught while starting the threads: " + e.ToString());
+            }
+        }
         /// <summary> 
         /// Wątek odbierający komunikaty z sieci
         /// </summary>
-        virtual protected void ListenerThread()
+        private void ListenerThread()
 		{
             byte[] receivedBytes;
             NetPacket receivedPacket = new NetPacket();
@@ -56,6 +95,7 @@ namespace MetronomySimul
                 receivedPacket = new NetPacket();
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
+
                 if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()) && receivedPacket.sender_port != 8080)
                 {
                     packetsReceived.Enqueue(receivedPacket);
@@ -64,15 +104,10 @@ namespace MetronomySimul
 			}
 		}
 
-
-        public IPEndPoint GetTargetEndpoint()
-        {
-            return this.targetEndPoint;
-        }
 		/// <summary>
-		/// Wątek wysyłający komunikaty w sieć 
+		/// Wątek wysyłający komunikaty o oscylacji w do połączonego metronomu
 		/// </summary>
-		virtual protected void SenderThread()     
+		private void SenderThread()     
 		{
 			while(true)
 			{
@@ -85,18 +120,21 @@ namespace MetronomySimul
 			}
 		}
 
-        private Task Process() {
+        /// <summary>
+        /// Zadanie uruchamiane asynchronicznie, podczas gdy odbierzemy pakiet od połączonego metronomu w wątku ListenerThread
+        /// </summary>
+        /// <returns></returns>
+        private Task Process() 
+        {
             var result = Task.Run(() => ProcessingThread());
             return result;
         }
              
-
 		/// <summary>
-		/// Wątek przetwarzający odebrane pakiety
+		/// Wątek przetwarzający odebrane pakiety od połączonego metronomu, wywoływany asynchronicznie w metodzie Process()
 		/// </summary>
-		virtual protected void ProcessingThread()
+		private void ProcessingThread()
         {
-        
                 //jak są jakieś otrzymane pakiety to je przetwarza
                 if(packetsReceived.Count > 0)
                 {
@@ -107,44 +145,25 @@ namespace MetronomySimul
                     if (toProcess.operation == Operations.SYNC)
                     {
                         OscillatorUpdator.GiveOscInfoForeign(NetPacket.ReadOscInfoFromData(toProcess.data));
-                    }
-
-					if (toProcess.operation == Operations.PING)
-					{
-						NetPacket packetToSend = new NetPacket(toProcess, Operations.ACK);
-						AddAwaitingToSendPacket(packetToSend);
-					}
-
-					if (toProcess.operation == Operations.ERROR)
-					{
-
-					}
-
-					if (toProcess.operation == Operations.ACK)
-					{
-
-					}
-
-					if (toProcess.operation == Operations.NACK)
-					{
-
-					}
-                    
+                    }                    
 				}
-
-                //jak są jakieś informacje do wysłania, to je wsadza do kolejki do wysłania
         }
+        //=========================================================================================
 
+
+
+        //Tworzenie i obsługa pakietów Net=========================================================
         /// <summary>
-        /// Metoda wywoływana przez Watchdog dla każdego NetInterface'u, w celu wysłania pakietu SYNC do połączonego metronomu
+        /// Dodaje do kolejki pakietów do wysłania dane oscylacji
         /// </summary>
         /// <param name="oscilation_info"></param>
 		public void sendSyncPacket(System.Tuple<double, double> oscilation_info)
         {
             AddAwaitingToSendPacket(MakeSyncPacket(oscilation_info));
         }
+
         /// <summary>
-        /// Tworzenie pakietu do synchronizacji z powiązanym na danym interfejsie metronomem
+        /// Tworzenie pakietu z danymi oscylacji do synchronizacji z powiązanym na danym interfejsie metronomem
         /// </summary>
         /// <param name="oscilation_info"></param>
         /// <returns></returns>
@@ -156,9 +175,8 @@ namespace MetronomySimul
             return sync;
         }
 
-
         /// <summary>
-        /// Zwraca pierwszy pakiet w kolejce pakietów odebranych
+        /// Zwraca i usuwa pierwszy pakiet w kolejce pakietów odebranych
         /// </summary>
         /// <returns></returns>
         protected NetPacket GetReceivedPacket()
@@ -182,7 +200,7 @@ namespace MetronomySimul
         }
 
         /// <summary>
-        /// Zwraca pierwszy pakiet w kolejce pakietów do wysłania
+        /// Zwraca i usuwa pierwszy pakiet w kolejce pakietów do wysłania
         /// </summary>
         /// <returns></returns>
         protected NetPacket GetAwaitingToSendPacket()
@@ -204,73 +222,70 @@ namespace MetronomySimul
             packetsToSend.Enqueue(newPacket);
             sendMutex.ReleaseMutex();
         }
+        //=========================================================================================
 
+
+
+        //Nawiązywanie i przerywanie połączeń======================================================
+        public bool IsConnected() => isConnected;
+
+        /// <summary>
+        /// Nawiązuje połączenie z metronomem o wskazanym endpoincie, jeżeli nie jest jeszcze połączony
+        /// </summary>
+        /// <param name="targetEndPoint">IPEndPoint docelowego metronomu</param>
+	    public void SetConnection(IPEndPoint targetEndPoint)
+		{
+            if (isConnected == false)
+            {
+                //Inicjalizacja pól
+                this.targetEndPoint = targetEndPoint;
+
+                //Uruchomienie wątków
+                StartThreads();
+
+                //Sorki, mam chłopaka
+                isConnected = true;
+
+                //Log
+                this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t has connected to " + targetEndPoint.Address.ToString());
+            }
+            else
+                this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t tried to connect to endpoint " + targetEndPoint.Address.ToString() + "but is already connected!");
+        }
+
+        /// <summary>
+        /// Przerywa obecne połączenie, jeżeli takie istnieje
+        /// </summary>
+		public void TerminateConnection()
+		{
+            if (isConnected == true)
+            {
+                //Wyłączenie wątków
+                StopThreads();
+
+                //Czyszczenie pól
+                packetsToSend.Clear();
+                packetsReceived.Clear();
+                targetEndPoint = null;
+
+                //Od dzisiaj jestem wolna
+                isConnected = false;
+
+                //Log
+                this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t has disconected from another metronome");
+            }
+            else
+                this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t tried to disconnect, but wasn't connected anywhere!");
+        }
+        //=========================================================================================
+
+
+
+        //Przydatne metody=========================================================================
         public int GetPortNumber() => localEndPoint.Port;
 
         public int GetInterfaceNumber() => localEndPoint.Port - 8080;
 
-        public bool IsConnected() => isConnected;
-
-	    public void SetConnection(IPEndPoint targetEndPoint)
-		{
-			//Inicjalizacja pól
-			this.targetEndPoint = targetEndPoint;
-
-            //Uruchomienie wątków
-            StartThreads();
-
-			//Sorki, mam chłopaka
-			isConnected = true;
-
-            //Log
-            this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t has connected to " + targetEndPoint.Address.ToString());
-        }
-
-		public void TerminateConnection()
-		{
-            //Wyłączenie wątków
-            StopThreads();
-
-            //Czyszczenie pól
-            packetsToSend.Clear();
-			packetsReceived.Clear();
-			targetEndPoint = null;
-
-			//Od dzisiaj jestem wolna
-			isConnected = false;
-
-            //Log
-            this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t has disconected from another metronome");
-        }
-
-        virtual public void StartThreads()  //Startuje wątki interfejsu sieciowego
-        {
-            try
-            {
-                senderThread = new Thread(SenderThread);
-                listenerThread = new Thread(ListenerThread);
-
-                senderThread.Start();
-                listenerThread.Start();
-            }
-            catch(ThreadStartException ex)
-            {
-                throw ex;
-            }
-        }
-
-        virtual public void StopThreads()       //Zabija wątki interfejsu sieciowego
-        {
-            try
-            {
-                senderThread.Abort();
-                listenerThread.Abort();
-            } catch(ThreadStateException ex)
-            {
-                throw ex;
-            }
-        }
-        
         public int ParseToInt(string str)
         {
             int result = 0;
