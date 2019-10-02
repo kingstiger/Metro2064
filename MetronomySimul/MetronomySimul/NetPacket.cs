@@ -101,11 +101,13 @@ namespace MetronomySimul
         /// <returns></returns>
         static public Tuple<double, double> ReadOscInfoFromData(string data)
         {
+            int i = 0;
             string wychylenie = "", czestotliwosc = "";
             Tuple<double, double> Osc;
-            for (int i = 0; data[i] != ';'; i++)
+            for (; data[i] != ';'; i++)
                 wychylenie += data[i];
-            for (int i = 0; data[i] != ';'; i++)
+            i++;
+            for (; data[i] != ';'; i++)
                 czestotliwosc += data[i];
             Osc = new Tuple<double, double>(double.Parse(wychylenie), double.Parse(czestotliwosc));
             return Osc;
