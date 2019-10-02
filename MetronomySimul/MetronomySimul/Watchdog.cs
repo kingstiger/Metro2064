@@ -26,23 +26,8 @@ namespace MetronomySimul
         public IPEndPoint GetLocalEndpoint() => eth.localEndPoint;
         public IPEndPoint GetTargetEndpoint() => eth.targetEndPoint;
 
-        //Oferowanie interfejsów i nawiązywanie/przerywanie połączeń
+        //Nawiązywanie/przerywanie połączeń
         public bool IsAvaiable() => !eth.IsConnected() && !isOffered;
-        public void OfferInterface(WNetInterface wNet, IPEndPoint targetEndpoint)
-        {
-            wNet.isOffered = true;
-            secondsElapsedLastPing = -1;
-            //wyślij do kolejki rzeczy do wysłania....
-
-            form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " offered. Awaiting ACK...");
-        }
-        public void StopOfferingInterface(WNetInterface wNet)
-        {
-            wNet.isOffered = false;
-            secondsElapsedLastPing = -1;
-
-            this.form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " is no longer offered");
-        }
         public void SetConnection(IPEndPoint targetEndPoint) //Łączy wybrany interfejs z wybranym endpointem
         {
             isOffered = false;
@@ -57,7 +42,7 @@ namespace MetronomySimul
             eth.TerminateConnection();
         }
 
-        //
+        //Dalsze gówna
     }
     class Watchdog
     {
@@ -88,6 +73,23 @@ namespace MetronomySimul
             {
                 interfaces.Add(new WNetInterface(localAddress, i, form)); //Tworzy nowy interfejs sieciowy i przypisuje mu numer
             }
+        }
+
+        //Oferowanie interfejsów
+        public void OfferInterface(WNetInterface wNet, IPEndPoint targetEndpoint)
+        {
+            wNet.isOffered = true;
+            wNet.secondsElapsedLastPing = -1;
+            //wyślij do kolejki rzeczy do wysłania....
+
+            form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " offered. Awaiting ACK...");
+        }
+        public void StopOfferingInterface(WNetInterface wNet)
+        {
+            wNet.isOffered = false;
+            wNet.secondsElapsedLastPing = -1;
+
+            this.form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " is no longer offered");
         }
     }
 }
