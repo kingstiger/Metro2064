@@ -116,7 +116,7 @@ namespace MetronomySimul
             } catch (ThreadAbortException)
             {
                 ;
-            }catch (ThreadStateException)
+            } catch (ThreadStateException)
             {
                 ;
             }
