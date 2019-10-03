@@ -212,11 +212,12 @@ namespace MetronomySimul
         /// </summary>
         private void CyclicThread()
         {
+            int discoverCounter = 0;
             while(true)
             {
                 TryPing();
                 TrySendOscillationInformation();
-                DiscoverIfAlone();
+                DiscoverIfAlone(discoverCounter);
                 Thread.Sleep(1000);
             }
         }
@@ -276,16 +277,20 @@ namespace MetronomySimul
         /// <summary>
         /// Jeśli żaden interfejs nie jest połączony ani zaoferowany, wysyła broadcastowo pakiet discover
         /// </summary>
-        private void DiscoverIfAlone()
+        private void DiscoverIfAlone(int discoverCounter)
         {
-            foreach (WNetInterface wNetInterface in interfaces)
+            if (++discoverCounter >= 10)
             {
-                if(!wNetInterface.IsAvaiable())
+                discoverCounter = 0;
+                foreach (WNetInterface wNetInterface in interfaces)
                 {
-                    return;
+                    if (!wNetInterface.IsAvaiable())
+                    {
+                        return;
+                    }
                 }
+                AddAwaitingToSendPacket(MakeDiscoverPacket());
             }
-            AddAwaitingToSendPacket(MakeDiscoverPacket());
         }
 
         //Oferowanie interfejsów=======================================================================================
