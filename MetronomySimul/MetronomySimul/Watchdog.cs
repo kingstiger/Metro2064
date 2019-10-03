@@ -12,7 +12,7 @@ namespace MetronomySimul
     {
         private List<WNetInterface> interfaces = new List<WNetInterface>();
         public Form1 form;                                                  //Uchwyt na okno
-
+        int discoverCounter = 0;
         private UdpClient netClient;                                        //Instancja klasy UdpClient do przesyłania danych przez sieć za pomocą protokołu UDP
         private IPEndPoint localEndPoint;
         private Queue<NetPacket> packetsToSend, packetsReceived;            //Kolejki (bufory) komunikatów przychodzących i oczekujących na wysłanie
@@ -218,12 +218,12 @@ namespace MetronomySimul
         /// </summary>
         private void CyclicThread()
         {
-            int discoverCounter = 0;
+                                    
             while(true)
             {
                 TryPing();
                 TrySendOscillationInformation();
-                DiscoverIfAlone(discoverCounter);
+                DiscoverIfAlone();
                 Thread.Sleep(1000);
             }
         }
@@ -283,7 +283,7 @@ namespace MetronomySimul
         /// <summary>
         /// Jeśli żaden interfejs nie jest połączony ani zaoferowany, wysyła broadcastowo pakiet discover
         /// </summary>
-        private void DiscoverIfAlone(int discoverCounter)
+        private void DiscoverIfAlone()
         {
             if (++discoverCounter >= 10)
             {
