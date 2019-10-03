@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace MetronomySimul
 {
+    //TODO -> deoffer
+    //TODO -> offered To
+    //TODO -> porty dobre w ack
     
     class Watchdog
     {
@@ -76,7 +79,14 @@ namespace MetronomySimul
                     toSendPacket = GetAwaitingToSendPacket();
                     this.form.DisplayOnLog("WATCHDOG>#\tSending: " + toSendPacket.operation + " to " + toSendPacket.receiver_IP);
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(toSendPacket);
-                    netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, toSendPacket.receiver_port));
+                    if (toSendPacket.operation.Equals(Operations.ACK))
+                    {
+                        netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, 8080));
+                    }
+                    else
+                    {
+                        netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, toSendPacket.receiver_port));
+                    }
                 }
             }
         }
@@ -135,7 +145,7 @@ namespace MetronomySimul
                     {
                         if (wNetInterface.IsAvaiable() && !wNetInterface.isOffered)
                         {
-                            OfferInterface(wNetInterface, new IPEndPoint(toProcess.sender_IP, 0));
+                            OfferInterface(wNetInterface, new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
                             goto End;
                         }
                     }
@@ -358,8 +368,12 @@ namespace MetronomySimul
         /// <returns></returns>
         protected NetPacket GetReceivedPacket()
         {
+            NetPacket temp;
             receiveMutex.WaitOne();
-            NetPacket temp = packetsReceived.Dequeue();
+            if (packetsReceived.Count > 0)
+                temp = packetsReceived.Dequeue();
+            else
+                temp = null;
             receiveMutex.ReleaseMutex();
 
             return temp;
