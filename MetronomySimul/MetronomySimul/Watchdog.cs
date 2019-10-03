@@ -102,8 +102,8 @@ namespace MetronomySimul
                 if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()))
                 {
                     this.form.DisplayOnLog("WATCHDOG>#\tReceived: " + receivedPacket.operation + " from " + receivedPacket.sender_IP);
-                    
-                    Task.Run(async () => await Process(receivedPacket));
+                    AddReceivedPacket(receivedPacket);
+                    Task.Run(async () => await Process());
                 }
             }
         }
@@ -113,9 +113,9 @@ namespace MetronomySimul
         /// </summary>
         /// <param name="receivedPacket"></param>
         /// <returns></returns>
-        private Task Process(NetPacket receivedPacket)
+        private Task Process()
         {
-            var result = Task.Run(() => ProcessingThread(receivedPacket));
+            var result = Task.Run(() => ProcessingThread());
             return result;
         }
 
@@ -124,82 +124,88 @@ namespace MetronomySimul
         /// Funkcja przetwarzająca odebrane pakiety
         /// </summary>
         /// <param name="toProcess"></param>
-        private void ProcessingThread(NetPacket toProcess)
+        private void ProcessingThread()
         {
-            if(toProcess.operation.Equals(Operations.DISCOVER))
+            NetPacket toProcess = null;
+            while ((toProcess = GetReceivedPacket()) != null)
             {
-                foreach (WNetInterface wNetInterface in interfaces)
-                {
-                    if(wNetInterface.IsAvaiable() && !wNetInterface.isOffered)
-                    {
-                        OfferInterface(wNetInterface, new IPEndPoint(toProcess.sender_IP, 0));
-                        return;
-                    }
-                }
-            }
-            if(toProcess.operation.Equals(Operations.OFFER))
-            {
-                foreach (WNetInterface wNetInterface in interfaces)
-                {
-                    if(wNetInterface.IsAvaiable() && !wNetInterface.isOffered)
-                    {
-                        wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
-                        AddAwaitingToSendPacket(MakeAckPacket(toProcess));
-                        return;
-                    }
-                }
-            }
-            if(toProcess.operation.Equals(Operations.PING))
-            {
-                AddAwaitingToSendPacket(MakeAckPacket(toProcess));
-                foreach (WNetInterface wNetInterface in interfaces)
-                {
-                    if (wNetInterface.IsConnected()
-                        && wNetInterface.GetTargetEndpoint().Address.ToString()
-#pragma warning disable CS0618 // Type or member is obsolete
-                        .Equals(toProcess.sender_IP.Address.ToString()))
-#pragma warning restore CS0618 // Type or member is obsolete
-                    {
-                        wNetInterface.ZeroPing();
-                        wNetInterface.ResetPingCount();
-                        return;
-                    }
-                }
-            }
-            if(toProcess.operation.Equals(Operations.ACK))
-            {
-                if(toProcess.data.Equals(Operations.PING))
+                if (toProcess.operation.Equals(Operations.DISCOVER))
                 {
                     foreach (WNetInterface wNetInterface in interfaces)
                     {
+                        if (wNetInterface.IsAvaiable() && !wNetInterface.isOffered)
+                        {
+                            OfferInterface(wNetInterface, new IPEndPoint(toProcess.sender_IP, 0));
+                            goto End;
+                        }
+                    }
+                }
+                if (toProcess.operation.Equals(Operations.OFFER))
+                {
+                    foreach (WNetInterface wNetInterface in interfaces)
+                    {
+                        if (wNetInterface.IsAvaiable() && !wNetInterface.isOffered)
+                        {
+                            wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
+                            AddAwaitingToSendPacket(MakeAckPacket(toProcess));
+                            goto End;
+                        }
+                    }
+                }
+                if (toProcess.operation.Equals(Operations.PING))
+                {
+                    AddAwaitingToSendPacket(MakeAckPacket(toProcess));
+                    foreach (WNetInterface wNetInterface in interfaces)
+                    {
                         if (wNetInterface.IsConnected()
-                        && wNetInterface.GetTargetEndpoint().Address.ToString()
+                            && wNetInterface.GetTargetEndpoint().Address.ToString()
 #pragma warning disable CS0618 // Type or member is obsolete
                         .Equals(toProcess.sender_IP.Address.ToString()))
 #pragma warning restore CS0618 // Type or member is obsolete
                         {
                             wNetInterface.ZeroPing();
                             wNetInterface.ResetPingCount();
-                            return;
+                            goto End;
                         }
                     }
                 }
-                if(toProcess.data.Equals(Operations.OFFER))
+                if (toProcess.operation.Equals(Operations.ACK))
                 {
-                    foreach (WNetInterface wNetInterface in interfaces)
+                    if (toProcess.data.Equals(Operations.PING))
                     {
-                        if (wNetInterface.IsConnected()
-                        && wNetInterface.GetTargetEndpoint().Address.ToString()
+                        foreach (WNetInterface wNetInterface in interfaces)
+                        {
+                            if (wNetInterface.IsConnected()
+                            && wNetInterface.GetTargetEndpoint().Address.ToString()
 #pragma warning disable CS0618 // Type or member is obsolete
                         .Equals(toProcess.sender_IP.Address.ToString()))
 #pragma warning restore CS0618 // Type or member is obsolete
+                            {
+                                wNetInterface.ZeroPing();
+                                wNetInterface.ResetPingCount();
+                                goto End;
+                            }
+                        }
+                    }
+                    if (toProcess.data.Equals(Operations.OFFER))
+                    {
+                        foreach (WNetInterface wNetInterface in interfaces)
                         {
-                            wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
-                            StopOfferingInterface(wNetInterface);
-                            return;
+                            if (wNetInterface.IsConnected()
+                            && wNetInterface.GetTargetEndpoint().Address.ToString()
+#pragma warning disable CS0618 // Type or member is obsolete
+                        .Equals(toProcess.sender_IP.Address.ToString()))
+#pragma warning restore CS0618 // Type or member is obsolete
+                            {
+                                wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
+                                StopOfferingInterface(wNetInterface);
+                                goto End;
+                            }
                         }
                     }
                 }
+                End:
+                toProcess = null;
             }
         }
 
