@@ -46,3 +46,13 @@ C:\Users\frugo\OneDrive\Pulpit\metro\Metro2064\MetronomySimul\MetronomySimul\obj
 C:\Users\frugo\OneDrive\Pulpit\metro\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csproj.GenerateResource.cache
 C:\Users\frugo\OneDrive\Pulpit\metro\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.exe
 C:\Users\frugo\OneDrive\Pulpit\metro\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.pdb
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.exe.config
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.exe
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\bin\Debug\MetronomySimul.pdb
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csprojAssemblyReference.cache
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.Form1.resources
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.Properties.Resources.resources
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csproj.GenerateResource.cache
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.csproj.CoreCompileInputs.cache
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.exe
+C:\Users\adminl\Desktop\XD\Metro2064\MetronomySimul\MetronomySimul\obj\Debug\MetronomySimul.pdb
