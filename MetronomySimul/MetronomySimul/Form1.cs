@@ -14,9 +14,9 @@ namespace MetronomySimul
     public partial class Form1 : Form
     {
         //watchdog powinien miec metode ze daje jej info
-        const string IP_ADDRESS = "192.168.1.9";
-        const int NUMBER_OF_INTERFACES = 4;
-        const int WATCHDOG_PORT = 8080;
+        public const string IP_ADDRESS = "192.168.1.9";
+        public const int NUMBER_OF_INTERFACES = 4;
+        public const int WATCHDOG_PORT = 8080;
 
         private Watchdog watchdog;
         private double wychylenie, frequency = 0; //wychylenie <-1, 1>, czestotliwosc (0Hz, 1Hz>
@@ -91,7 +91,7 @@ namespace MetronomySimul
                 {
                     //obsluga w oknie, domyslnie dwa progress bary - jeden normalny "przyklejony" to drugiego
                     //drugi z ustawionym rightToLeft = true, yes, whtvr
-
+                    oscInfoMutex.WaitOne();
                     if (wychylenie > 0)
                     {
                         if (IsHandleCreated)
@@ -116,6 +116,7 @@ namespace MetronomySimul
                             }));
                         }
                     }
+                    oscInfoMutex.ReleaseMutex();
                 }
             }
         }
