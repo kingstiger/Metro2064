@@ -31,6 +31,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.CLOSEAPP = new System.Windows.Forms.Button();
             this.freqTextBox = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
@@ -50,7 +51,6 @@
             this.tabPage3 = new System.Windows.Forms.TabPage();
             this.Log = new System.Windows.Forms.RichTextBox();
             this.splitter1 = new System.Windows.Forms.Splitter();
-            this.CLOSEAPP = new System.Windows.Forms.Button();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -98,6 +98,18 @@
             this.groupBox2.TabIndex = 5;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Parametry oscylacji";
+            // 
+            // CLOSEAPP
+            // 
+            this.CLOSEAPP.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.CLOSEAPP.ForeColor = System.Drawing.Color.White;
+            this.CLOSEAPP.Location = new System.Drawing.Point(552, 0);
+            this.CLOSEAPP.Name = "CLOSEAPP";
+            this.CLOSEAPP.Size = new System.Drawing.Size(75, 23);
+            this.CLOSEAPP.TabIndex = 10;
+            this.CLOSEAPP.Text = "Zamknij";
+            this.CLOSEAPP.UseVisualStyleBackColor = false;
+            this.CLOSEAPP.Click += new System.EventHandler(this.CLOSEAPP_Click);
             // 
             // freqTextBox
             // 
@@ -282,17 +294,6 @@
             this.splitter1.Size = new System.Drawing.Size(8, 386);
             this.splitter1.TabIndex = 1;
             this.splitter1.TabStop = false;
-            // 
-            // CLOSEAPP
-            // 
-            this.CLOSEAPP.BackColor = System.Drawing.SystemColors.HotTrack;
-            this.CLOSEAPP.ForeColor = System.Drawing.Color.White;
-            this.CLOSEAPP.Location = new System.Drawing.Point(552, 0);
-            this.CLOSEAPP.Name = "CLOSEAPP";
-            this.CLOSEAPP.Size = new System.Drawing.Size(75, 23);
-            this.CLOSEAPP.TabIndex = 10;
-            this.CLOSEAPP.Text = "Zamknij";
-            this.CLOSEAPP.UseVisualStyleBackColor = false;
             // 
             // Form1
             // 

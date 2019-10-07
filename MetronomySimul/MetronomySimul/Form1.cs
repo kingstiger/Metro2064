@@ -124,23 +124,6 @@ namespace MetronomySimul
             }
         }
 
-        private void CLOSEAPP_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                thread.Abort();
-                watchdog.StopThreads();
-                Application.Exit();
-                Environment.Exit(0);
-            } catch (ThreadAbortException)
-            {
-                ;
-            } catch (ThreadStateException)
-            {
-                ;
-            }
-        }
-
         private void Form1_Load(object sender, EventArgs e)
         {
 
@@ -182,6 +165,25 @@ namespace MetronomySimul
         private void progressBar2_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void CLOSEAPP_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                thread.Abort();
+                watchdog.StopThreads();
+                Application.Exit();
+                Environment.Exit(0);
+            }
+            catch (ThreadAbortException)
+            {
+                ;
+            }
+            catch (ThreadStateException)
+            {
+                ;
+            }
         }
 
         public void DisplayOnLog(string text)
