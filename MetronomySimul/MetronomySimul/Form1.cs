@@ -14,7 +14,7 @@ namespace MetronomySimul
     public partial class Form1 : Form
     {
         //watchdog powinien miec metode ze daje jej info
-        public const string IP_ADDRESS = "192.168.1.9";
+        public const string IP_ADDRESS = "192.168.1.10";
         public const int NUMBER_OF_INTERFACES = 4;
         public const int WATCHDOG_PORT = 8080;
 
