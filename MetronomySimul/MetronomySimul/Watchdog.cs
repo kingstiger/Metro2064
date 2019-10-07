@@ -240,7 +240,6 @@ namespace MetronomySimul
             {
                 TryDeoffer();
                 TryPing();
-                TrySendOscillationInformation();
                 DiscoverIfAlone();
                 Thread.Sleep(1000);
             }
@@ -296,19 +295,17 @@ namespace MetronomySimul
         /// <summary>
         /// Próba wysłania informacji o oscylacji do wszystkich dostępnych metronomów
         /// </summary>
-        private void TrySendOscillationInformation()
+        public void TrySendOscillationInformation()
         {
-            Tuple<double, double> osc_info = form.GetOscInfoToSend();
-            if (osc_info.Item1 > 0.9 || osc_info.Item1 < -0.9)
-            {
+            
                 foreach (WNetInterface wNetInterface in interfaces)
                 {
                     if (wNetInterface.IsConnected())
                     {
-                        wNetInterface.SendOscilations(osc_info);
+                        wNetInterface.SendOscilations(form.GetOscInfoToSend());
                     }
                 }
-            }
+            
         }
 
 

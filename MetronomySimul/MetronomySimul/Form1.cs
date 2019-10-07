@@ -84,8 +84,7 @@ namespace MetronomySimul
                     if (wychylenie > 1)
                         wychylenie = 1;
                     else wychylenie = -1;
-                    Tuple<double, double> infoToGive = new Tuple<double, double>(wychylenie, frequency);
-                    OscillatorUpdator.GiveOscInfoDomestic(infoToGive);
+                    watchdog.TrySendOscillationInformation();
                 }
                 else
                 {
