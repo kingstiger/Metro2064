@@ -144,7 +144,7 @@ namespace MetronomySimul
 
         }
         
-        private void SetCheckBoxAndIp(string ipAddress, int interfaceNumber)
+        public void SetCheckBoxAndIp(string ipAddress, int interfaceNumber)
         {
             try
             {
