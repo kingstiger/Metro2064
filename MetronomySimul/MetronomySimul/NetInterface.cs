@@ -114,7 +114,7 @@ namespace MetronomySimul
 				if(packetsToSend.Count > 0)
 				{
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(GetAwaitingToSendPacket());
-                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\tSending bytes: " + bytesToSend + " to " + targetEndPoint.ToString()); 
+                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\tSending OSC to " + targetEndPoint.ToString()); 
                     netClient.Send(bytesToSend, bytesToSend.Length, targetEndPoint);
 				}
 			}
@@ -252,6 +252,7 @@ namespace MetronomySimul
 
                 //Log
                 this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t has connected to " + targetEndPoint.Address.ToString());
+                this.form.SetCheckBoxAndIp(targetEndPoint.Address.ToString(), this.interfaceNumber);
             }
             else
                 this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t tried to connect to endpoint " + targetEndPoint.Address.ToString() + "but is already connected!");
@@ -277,6 +278,7 @@ namespace MetronomySimul
 
                 //Log
                 this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t has disconected from another metronome");
+                this.form.SetCheckBoxAndIp("", this.interfaceNumber);
             }
             else
                 this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\t tried to disconnect, but wasn't connected anywhere!");
