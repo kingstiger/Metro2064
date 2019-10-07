@@ -429,10 +429,10 @@ namespace MetronomySimul
         private NetPacket MakePingPacket(WNetInterface wNetInterface)
         {
             return new NetPacket(
-                             wNetInterface.GetTargetEndpoint().Address,
                              wNetInterface.GetLocalEndpoint().Address,
-                             wNetInterface.GetTargetEndpoint().Port,
+                             wNetInterface.GetTargetEndpoint().Address,
                              wNetInterface.GetLocalEndpoint().Port,
+                             wNetInterface.GetTargetEndpoint().Port,
                              0,
                              Operations.PING,
                              "");
