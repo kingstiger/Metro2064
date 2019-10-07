@@ -432,7 +432,7 @@ namespace MetronomySimul
                              wNetInterface.GetLocalEndpoint().Address,
                              wNetInterface.GetTargetEndpoint().Address,
                              wNetInterface.GetLocalEndpoint().Port,
-                             wNetInterface.GetTargetEndpoint().Port,
+                             8080,
                              0,
                              Operations.PING,
                              "");
