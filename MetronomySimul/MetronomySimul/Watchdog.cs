@@ -154,7 +154,7 @@ namespace MetronomySimul
                 {
                     foreach (WNetInterface wNetInterface in interfaces)
                     {
-                        if (wNetInterface.IsAvaiable() && wNetInterface.offeredTo.Address.ToString().Equals(toProcess.sender_IP.ToString()))
+                        if (wNetInterface.IsAvaiable())
                         {
                             wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
                             AddAwaitingToSendPacket(MakeAckPacket(toProcess));
@@ -205,11 +205,8 @@ namespace MetronomySimul
                     {
                         foreach (WNetInterface wNetInterface in interfaces)
                         {
-                            if (wNetInterface.IsConnected()
-                            && wNetInterface.GetTargetEndpoint().Address.ToString()
-#pragma warning disable CS0618 // Type or member is obsolete
-                        .Equals(toProcess.sender_IP.Address.ToString()))
-#pragma warning restore CS0618 // Type or member is obsolete
+                            if (!wNetInterface.IsConnected() &&
+                                wNetInterface.offeredTo.ToString().Equals(toProcess.sender_IP.Address.ToString()))
                             {
                                 wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
                                 StopOfferingInterface(wNetInterface);
