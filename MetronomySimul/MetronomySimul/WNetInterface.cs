@@ -44,10 +44,11 @@ namespace MetronomySimul
         /// <param name="targetEndPoint">Endpoint, z którym zostanie nawiązanie połaczenie</param>
         public void SetConnection(IPEndPoint targetEndPoint)
         {
-            isOffered = false;
             ZeroPing();
             ResetPingCount();
             eth.SetConnection(targetEndPoint);
+
+            isOffered = false;
         }
 
         /// <summary>
@@ -55,11 +56,12 @@ namespace MetronomySimul
         /// </summary>
         public void TerminateConnection()
         {
-            isOffered = false;
-            offeredTo = null;
             ResetPingCount();
             ZeroPing();
             eth.TerminateConnection();
+
+            isOffered = false;
+            offeredTo = null;
         }
 
         /// <summary>

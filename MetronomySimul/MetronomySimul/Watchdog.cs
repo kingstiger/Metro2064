@@ -207,7 +207,7 @@ namespace MetronomySimul
                         {
                             if (!wNetInterface.IsConnected() && wNetInterface.offeredTo != null)
                             {
-                                if (wNetInterface.offeredTo.ToString().Equals(toProcess.sender_IP.Address.ToString())
+                                if (wNetInterface.offeredTo.ToString().Equals(toProcess.sender_IP.Address.ToString()))
                                 {
                                     wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
                                     StopOfferingInterface(wNetInterface);
