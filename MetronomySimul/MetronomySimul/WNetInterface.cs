@@ -42,19 +42,20 @@ namespace MetronomySimul
         /// Uruchamia zawarty w klasie interfejs sieciowy i zestawia połączenie na podany endpoint
         /// </summary>
         /// <param name="targetEndPoint">Endpoint, z którym zostanie nawiązanie połaczenie</param>
-        public void SetConnection(IPEndPoint targetEndPoint)
+        public bool SetConnection(IPEndPoint targetEndPoint)
         {
             ZeroPing();
             ResetPingCount();
             eth.SetConnection(targetEndPoint);
 
             isOffered = false;
+            return true;
         }
 
         /// <summary>
         /// Wyłącza zawarty w klasie interfejs
         /// </summary>
-        public void TerminateConnection()
+        public bool TerminateConnection()
         {
             ResetPingCount();
             ZeroPing();
@@ -62,6 +63,7 @@ namespace MetronomySimul
 
             isOffered = false;
             offeredTo = null;
+            return true;
         }
 
         /// <summary>

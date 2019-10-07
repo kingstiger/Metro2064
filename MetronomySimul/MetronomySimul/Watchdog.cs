@@ -156,7 +156,7 @@ namespace MetronomySimul
                     {
                         if (wNetInterface.IsAvaiable())
                         {
-                            wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
+                            if(wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port)))
                             AddAwaitingToSendPacket(MakeAckPacket(toProcess));
                             goto End;
                         }
@@ -209,7 +209,7 @@ namespace MetronomySimul
                             {
                                 if (wNetInterface.offeredTo.ToString().Equals(toProcess.sender_IP.Address.ToString()))
                                 {
-                                    wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
+                                    if(wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port)))
                                     StopOfferingInterface(wNetInterface);
                                     goto End;
                                 }
@@ -261,7 +261,7 @@ namespace MetronomySimul
                     {
                         if (wNetInterface.DoTerminate())
                         {
-                            wNetInterface.TerminateConnection();
+                            if(wNetInterface.TerminateConnection())
                             hasAnyoneBeenPinged = true;
                         }
                         else
