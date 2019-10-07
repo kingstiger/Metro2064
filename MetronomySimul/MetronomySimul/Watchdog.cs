@@ -298,11 +298,15 @@ namespace MetronomySimul
         /// </summary>
         private void TrySendOscillationInformation()
         {
-            foreach (WNetInterface wNetInterface in interfaces)
+            Tuple<double, double> osc_info = form.GetOscInfoToSend();
+            if (osc_info.Item1 > 0.9 || osc_info.Item1 < -0.9)
             {
-                if (wNetInterface.IsConnected())
+                foreach (WNetInterface wNetInterface in interfaces)
                 {
-                    wNetInterface.SendOscilations(form.GetOscInfoToSend());
+                    if (wNetInterface.IsConnected())
+                    {
+                        wNetInterface.SendOscilations(osc_info);
+                    }
                 }
             }
         }
