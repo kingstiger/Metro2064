@@ -235,13 +235,15 @@ namespace MetronomySimul
         /// </summary>
         private void CyclicThread()
         {
-                                    
+            int counter = 0;               
             while(true)
             {
                 TryDeoffer();
                 TryPing();
+                TrySendOscillationInformation(++counter);
                 DiscoverIfAlone();
                 Thread.Sleep(1000);
+                if (counter > 100) counter = 0;
             }
         }
 
@@ -295,9 +297,10 @@ namespace MetronomySimul
         /// <summary>
         /// Próba wysłania informacji o oscylacji do wszystkich dostępnych metronomów
         /// </summary>
-        public void TrySendOscillationInformation()
+        public void TrySendOscillationInformation(int counter)
         {
-            
+            if (counter % 2 == 0)
+            {
                 foreach (WNetInterface wNetInterface in interfaces)
                 {
                     if (wNetInterface.IsConnected())
@@ -305,7 +308,7 @@ namespace MetronomySimul
                         wNetInterface.SendOscilations(form.GetOscInfoToSend());
                     }
                 }
-            
+            }
         }
 
 
