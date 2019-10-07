@@ -144,7 +144,7 @@ namespace MetronomySimul
 
                     if (toProcess.operation == Operations.SYNC)
                     {
-                        OscillatorUpdator.GiveOscInfoForeign(NetPacket.ReadOscInfoFromData(toProcess.data));
+                    form.ApplyGivenOscInfo(NetPacket.ReadOscInfoFromData(toProcess.data));
                     }                    
 				}
         }

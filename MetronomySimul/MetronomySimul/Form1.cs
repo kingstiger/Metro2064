@@ -23,6 +23,7 @@ namespace MetronomySimul
         private int kierunek; //kierunek {-1, 1}
         private Thread thread;
         private string[] connectionsConsole = new string[4];
+        private Mutex oscInfoMutex;
         public Form1()
         {
             InitializeComponent();
@@ -37,6 +38,7 @@ namespace MetronomySimul
                 kierunek = 1;
             else kierunek = -1;
 
+            oscInfoMutex = new Mutex();
             watchdog = new Watchdog(IP_ADDRESS, WATCHDOG_PORT, NUMBER_OF_INTERFACES, this); //Tu zmieniaj ilosc interfejsow (domyslnie 4)
             progressBar1.Maximum = 1000;
             progressBar2.Maximum = 1000;
@@ -45,6 +47,18 @@ namespace MetronomySimul
             thread.Start();
         }
 
+        public Tuple<double, double> GetOscInfoToSend()
+        {
+            return new Tuple<double, double>(wychylenie, frequency);
+        }
+
+        public void ApplyGivenOscInfo(Tuple<double, double> osc_info)
+        {
+            oscInfoMutex.WaitOne();
+            wychylenie = (wychylenie + osc_info.Item1) / 2;
+            frequency = (frequency + osc_info.Item2) / 2;
+            oscInfoMutex.ReleaseMutex();
+        }
 
         private void PendulumThread()
         {
