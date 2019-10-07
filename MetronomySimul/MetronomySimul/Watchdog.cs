@@ -205,12 +205,18 @@ namespace MetronomySimul
                     {
                         foreach (WNetInterface wNetInterface in interfaces)
                         {
-                            if (!wNetInterface.IsConnected() &&
-                                wNetInterface.offeredTo.ToString().Equals(toProcess.sender_IP.Address.ToString()))
+                            if (!wNetInterface.IsConnected() && wNetInterface.offeredTo != null)
                             {
-                                wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
-                                StopOfferingInterface(wNetInterface);
-                                goto End;
+                                if (wNetInterface.offeredTo.ToString().Equals(toProcess.sender_IP.Address.ToString())
+                                {
+                                    wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
+                                    StopOfferingInterface(wNetInterface);
+                                    goto End;
+                                }
+                            }
+                            else
+                            {
+                                //wyślij nack
                             }
                         }
                     }
