@@ -14,9 +14,11 @@ namespace MetronomySimul
     public partial class Form1 : Form
     {
         //watchdog powinien miec metode ze daje jej info
-        public const string IP_ADDRESS = "192.168.1.10";
-        public const int NUMBER_OF_INTERFACES = 4;
-        public const int WATCHDOG_PORT = 8080;
+        private const string IP_ADDRESS = "192.168.1.10";
+        private const int NUMBER_OF_INTERFACES = 4;
+        private const int WATCHDOG_PORT = 8080;
+
+        public int GetWatchdogPort() => WATCHDOG_PORT;
 
         private Watchdog watchdog;
         private double wychylenie, frequency = 0; //wychylenie <-1, 1>, czestotliwosc (0Hz, 1Hz>

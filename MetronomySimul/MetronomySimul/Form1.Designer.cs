@@ -94,7 +94,7 @@
             this.groupBox2.Controls.Add(this.progressBar1);
             this.groupBox2.Location = new System.Drawing.Point(6, 6);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(633, 332);
+            this.groupBox2.Size = new System.Drawing.Size(632, 327);
             this.groupBox2.TabIndex = 5;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "Parametry oscylacji";
@@ -103,7 +103,7 @@
             // 
             this.CLOSEAPP.BackColor = System.Drawing.SystemColors.HotTrack;
             this.CLOSEAPP.ForeColor = System.Drawing.Color.White;
-            this.CLOSEAPP.Location = new System.Drawing.Point(552, 0);
+            this.CLOSEAPP.Location = new System.Drawing.Point(557, 0);
             this.CLOSEAPP.Name = "CLOSEAPP";
             this.CLOSEAPP.Size = new System.Drawing.Size(75, 23);
             this.CLOSEAPP.TabIndex = 10;
@@ -186,7 +186,7 @@
             this.groupBox1.Controls.Add(this.textBoxIP3);
             this.groupBox1.Location = new System.Drawing.Point(6, 6);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(633, 332);
+            this.groupBox1.Size = new System.Drawing.Size(629, 324);
             this.groupBox1.TabIndex = 8;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Interfejsy sieciowe";
@@ -283,7 +283,7 @@
             this.Log.Location = new System.Drawing.Point(6, 6);
             this.Log.Name = "Log";
             this.Log.ReadOnly = true;
-            this.Log.Size = new System.Drawing.Size(934, 568);
+            this.Log.Size = new System.Drawing.Size(629, 324);
             this.Log.TabIndex = 0;
             this.Log.Text = "Metronomy log";
             // 

@@ -23,7 +23,7 @@ namespace MetronomySimul
         private int seq_number;
 
         public Form1 form; //Uchwyt na okno
-        public int interfaceNumber; //Numer interfejsu
+        private int interfaceNumber; //Numer interfejsu
 
         /// <summary>
         /// Tworzy nową instancję interfejsu sieciowego do wymieniania danych oscylacji
@@ -96,7 +96,7 @@ namespace MetronomySimul
                 receivedBytes = netClient.Receive(ref targetEndPoint);
                 receivedPacket.ReadReceivedMsg(receivedBytes);
 
-                if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()) && receivedPacket.sender_port != 8080)
+                if (!receivedPacket.sender_IP.ToString().Equals(localEndPoint.Address.ToString()) && receivedPacket.sender_port != form.GetWatchdogPort())
                 {
                     packetsReceived.Enqueue(receivedPacket);
                     Task.Run(async () => await Process());
@@ -290,7 +290,7 @@ namespace MetronomySimul
         //Przydatne metody=========================================================================
         public int GetPortNumber() => localEndPoint.Port;
 
-        public int GetInterfaceNumber() => localEndPoint.Port - 8080;
+        public int GetInterfaceNumber() => this.interfaceNumber;
 
         public int ParseToInt(string str)
         {
