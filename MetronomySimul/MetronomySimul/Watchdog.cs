@@ -297,17 +297,11 @@ namespace MetronomySimul
         /// </summary>
         private void TrySendOscillationInformation()
         {
-            Tuple<double, double> osc_info = null;
-            if (OscillatorUpdator.oscillation_info_domestic.Count > 0)
+            foreach (WNetInterface wNetInterface in interfaces)
             {
-                osc_info = OscillatorUpdator.GetOscInfoDomestic();
-
-                foreach (WNetInterface wNetInterface in interfaces)
+                if (wNetInterface.IsConnected())
                 {
-                    if (wNetInterface.IsConnected())
-                    {
-                        wNetInterface.SendOscilations(osc_info);
-                    }
+                    wNetInterface.SendOscilations(form.GetOscInfoToSend());
                 }
             }
         }
