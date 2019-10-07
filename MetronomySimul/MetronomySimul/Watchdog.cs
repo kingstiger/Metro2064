@@ -81,7 +81,7 @@ namespace MetronomySimul
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(toSendPacket);
                     if (toSendPacket.operation.Equals(Operations.ACK))
                     {
-                        netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, form.GetWatchdogPort()));
+                        netClient.Send(bytesToSend, bytesToSend.Length, new IPEndPoint(toSendPacket.receiver_IP, 8080));
                     }
                     else
                     {
@@ -414,7 +414,7 @@ namespace MetronomySimul
         }
 
         //================================================================================================================
-
+        
         //Metody do tworzenia gotowych pakietów ==========================================================================
 
         /// <summary>
@@ -428,7 +428,7 @@ namespace MetronomySimul
                              wNetInterface.GetLocalEndpoint().Address,
                              wNetInterface.GetTargetEndpoint().Address,
                              wNetInterface.GetLocalEndpoint().Port,
-                             form.GetWatchdogPort(),
+                             8080,
                              0,
                              Operations.PING,
                              "");

@@ -14,123 +14,45 @@ namespace MetronomySimul
     public partial class Form1 : Form
     {
         //watchdog powinien miec metode ze daje jej info
-        private const string IP_ADDRESS = "192.168.1.10";
+        private const string IP_ADDRESS = "192.168.1.9";
         private const int NUMBER_OF_INTERFACES = 4;
         private const int WATCHDOG_PORT = 8080;
 
         public int GetWatchdogPort() => WATCHDOG_PORT;
 
         private Watchdog watchdog;
-        private double wychylenie, frequency = 0; //wychylenie <-1, 1>, czestotliwosc (0Hz, 1Hz>
-        private int kierunek; //kierunek {-1, 1}
-        private Thread thread;
+        private Metronome metronome;
+        
         private string[] connectionsConsole = new string[4];
-        private Mutex oscInfoMutex;
         public Form1()
         {
             InitializeComponent();
-            Thread.Sleep(2000);
-            Random r = new Random();
-            wychylenie = r.NextDouble() * r.Next(-1, 1);
-            while (frequency == 0)
-            {
-                frequency = r.NextDouble();
-            }
-            if (r.Next(0, 1) == 1)
-                kierunek = 1;
-            else kierunek = -1;
-
-            oscInfoMutex = new Mutex();
+            
             watchdog = new Watchdog(IP_ADDRESS, WATCHDOG_PORT, NUMBER_OF_INTERFACES, this); //Tu zmieniaj ilosc interfejsow (domyslnie 4)
             progressBar1.Maximum = 1000;
             progressBar2.Maximum = 1000;
-            
-            thread = new Thread(PendulumThread);
-            thread.Start();
+            metronome = new Metronome(this);
         }
 
-        public Tuple<double, double> GetOscInfoToSend()
+        public void TrySendOscillationInformation()
         {
-            return new Tuple<double, double>(wychylenie, frequency);
-        }
-
-        public void ApplyGivenOscInfo(Tuple<double, double> osc_info)
-        {
-            oscInfoMutex.WaitOne();
-            wychylenie = (wychylenie + osc_info.Item1) / 2;
-            frequency = (frequency + osc_info.Item2) / 2;
-            oscInfoMutex.ReleaseMutex();
-        }
-
-        private void PendulumThread()
-        {
-
-
-            //tu będzie oscylacja
-            //nie wiem czy to zadziała
-            //jak bedzie GUI to sie przekonamy
-            while (true)
-            {
-                if (OscillatorUpdator.oscillation_info_foreign.Count > 0)
-                {
-                    Tuple<double, double> rcvd_info;
-                    rcvd_info = OscillatorUpdator.GetOscInfoForeign();
-                    wychylenie = (wychylenie + rcvd_info.Item1) / 2;
-                    frequency = (frequency + rcvd_info.Item2) / 2;
-                }
-                Thread.Sleep((int)(1000 / (frequency * 1000)));
-                wychylenie += (0.001 * kierunek);
-                if (wychylenie > 1 || wychylenie < -1)
-                {
-                    kierunek *= -1;
-                    if (wychylenie > 1)
-                        wychylenie = 1;
-                    else wychylenie = -1;
-                    watchdog.TrySendOscillationInformation();
-                }
-                else
-                {
-                    //obsluga w oknie, domyslnie dwa progress bary - jeden normalny "przyklejony" to drugiego
-                    //drugi z ustawionym rightToLeft = true, yes, whtvr
-                    oscInfoMutex.WaitOne();
-                    if (wychylenie > 0)
-                    {
-                        if (IsHandleCreated)
-                        {
-                            Invoke
-                            (new Action(() =>
-                            {
-                                progressBar1.Value = (int)(wychylenie * 1000);
-                                textBox1.Text = wychylenie.ToString();
-                                freqTextBox.Text = frequency.ToString();
-                                progressBar2.Value = 0;
-                            }));
-                        }
-                    }
-                    if (wychylenie < 0)
-                    {
-                        if (IsHandleCreated)
-                        {
-                            Invoke
-                            (new Action(() =>
-                            {
-                                progressBar2.Value = (-1) * (int)(wychylenie * 1000);
-                                textBox1.Text = wychylenie.ToString();
-                                freqTextBox.Text = frequency.ToString();
-                                progressBar1.Value = 0;
-                            }));
-                        }
-                    }
-                    oscInfoMutex.ReleaseMutex();
-                }
-            }
+            watchdog.TrySendOscillationInformation();
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
 
         }
-        
+        public Tuple<double, double> GetOscInfoToSend()
+        {
+            return metronome.GetOscInfoToSend();
+        }
+
+        public void ApplyGivenOscInfo(Tuple<double, double> osc_info)
+        {
+            metronome.ApplyGivenOscInfo(osc_info);
+        }
+
         public void SetCheckBoxAndIp(string ipAddress, int interfaceNumber)
         {
             try
@@ -169,11 +91,20 @@ namespace MetronomySimul
 
         }
 
+        public void SetPitch(double wychylenie)
+        {
+            textBox1.Text = wychylenie.ToString();
+        }
+
+        public void SetFrequency(double frequency)
+        {
+            freqTextBox.Text = frequency.ToString();
+        }
+
         private void CLOSEAPP_Click(object sender, EventArgs e)
         {
             try
             {
-                thread.Abort();
                 watchdog.StopThreads();
                 Application.Exit();
                 Environment.Exit(0);

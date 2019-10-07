@@ -23,11 +23,13 @@ namespace MetronomySimul
         private int offerTimeLeft;
         private Form1 form;        //Uchwyt na okno
         private int triedPings;
+        private Mutex pingMutex;
 
         public WNetInterface(string localAddress, int localPort, int interfaceNumber, Form1 form)
         {
             this.form = form;
             eth = new NetInterface(localAddress, localPort, interfaceNumber, form);
+            pingMutex = new Mutex();
             isOffered = false;
             offeredTo = null;
             ZeroOfferTime();
@@ -79,29 +81,52 @@ namespace MetronomySimul
         /// Zwięsza licznik sekund od ostatniego pinga o 1. Jeżeli czas od ostatniego pinga przekroczy 10 sekund metoda zwraca wartość logiczną false
         /// </summary>
         /// <returns></returns>
-        public bool IncrementLastPing() => (++secondsElapsedLastPing >= 10) ? true : false;
+        public bool IncrementLastPing()
+        {
+            pingMutex.WaitOne();
+            bool result = (++secondsElapsedLastPing >= 10) ? true : false;
+            pingMutex.ReleaseMutex();
+            return result;
+        }
 
         /// <summary>
         /// Zmniejsza licznik pozostałego czasu oferty
         /// </summary>
         /// <returns></returns>
         public bool DecrementOfferTime() => (--offerTimeLeft <= 0) ? true : false;
-        
+
         /// <summary>
         /// Stwierdza, czy trzeba kończyć połączenie (po 3 pingach bez odpowiedzi)
         /// </summary>
         /// <returns></returns>
-        public bool DoTerminate() => (++triedPings >= 3) ? true : false;
+        public bool DoTerminate()
+        {
+            pingMutex.WaitOne();
+            bool result = (++triedPings >= 3) ? true : false;
+            pingMutex.ReleaseMutex();
+            return result;
+        }
 
         /// <summary>
         /// Resetuje licznik wysłanych pingów
         /// </summary>
-        public void ResetPingCount() => triedPings = 0;
+        public void ResetPingCount()
+        {
+            pingMutex.WaitOne();
+            triedPings = 0;
+            pingMutex.ReleaseMutex();
+        }
 
         /// <summary>
         /// Zeruje licznik sekund od ostatniego pingu
         /// </summary>
-        public void ZeroPing() => secondsElapsedLastPing = 0;
+        public void ZeroPing()
+        {
+            pingMutex.WaitOne();
+            secondsElapsedLastPing = 0;
+            pingMutex.ReleaseMutex();
+        }
+
 
         /// <summary>
         /// Ustawia timeout ofertowania interfejsu po jej wysłaniu
