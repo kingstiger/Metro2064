@@ -267,6 +267,7 @@ namespace MetronomySimul
                         else
                         {
                             AddAwaitingToSendPacket(MakePingPacket(wNetInterface));
+                            wNetInterface.ZeroPing();
                             hasAnyoneBeenPinged = true;
                         }
                     }

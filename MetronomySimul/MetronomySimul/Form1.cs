@@ -14,7 +14,7 @@ namespace MetronomySimul
     public partial class Form1 : Form
     {
         //watchdog powinien miec metode ze daje jej info
-        public const string IP_ADDRESS = "192.168.1.10";
+        public const string IP_ADDRESS = "192.168.1.9";
         public const int NUMBER_OF_INTERFACES = 4;
         public const int WATCHDOG_PORT = 8080;
 
@@ -102,6 +102,7 @@ namespace MetronomySimul
                                 progressBar1.Value = (int)(wychylenie * 1000);
                                 textBox1.Text = wychylenie.ToString();
                                 freqTextBox.Text = frequency.ToString();
+                                progressBar2.Value = 0;
                             }));
                         }
                     }
@@ -114,6 +115,8 @@ namespace MetronomySimul
                             {
                                 progressBar2.Value = (-1) * (int)(wychylenie * 1000);
                                 textBox1.Text = wychylenie.ToString();
+                                freqTextBox.Text = frequency.ToString();
+                                progressBar1.Value = 0;
                             }));
                         }
                     }
