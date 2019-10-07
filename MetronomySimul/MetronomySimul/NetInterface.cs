@@ -114,7 +114,7 @@ namespace MetronomySimul
 				if(packetsToSend.Count > 0)
 				{
                     byte[] bytesToSend = NetPacket.TranslateMsgToSend(GetAwaitingToSendPacket());
-                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\tSending bytes: " + bytesToSend.ToString() + " to " + targetEndPoint.ToString()); 
+                    this.form.DisplayOnLog("ETH" + this.interfaceNumber + ">$\t\tSending bytes: " + bytesToSend + " to " + targetEndPoint.ToString()); 
                     netClient.Send(bytesToSend, bytesToSend.Length, targetEndPoint);
 				}
 			}

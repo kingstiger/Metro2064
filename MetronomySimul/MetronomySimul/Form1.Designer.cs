@@ -31,14 +31,7 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.CLOSEAPP = new System.Windows.Forms.Button();
-            this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label1 = new System.Windows.Forms.Label();
-            this.progressBar2 = new System.Windows.Forms.ProgressBar();
-            this.progressBar1 = new System.Windows.Forms.ProgressBar();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
-            this.Log = new System.Windows.Forms.RichTextBox();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.textBoxIP4 = new System.Windows.Forms.TextBox();
@@ -48,11 +41,22 @@
             this.textBoxIP2 = new System.Windows.Forms.TextBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.textBoxIP3 = new System.Windows.Forms.TextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.Log = new System.Windows.Forms.RichTextBox();
+            this.splitter1 = new System.Windows.Forms.Splitter();
+            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.progressBar2 = new System.Windows.Forms.ProgressBar();
+            this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this.label2 = new System.Windows.Forms.Label();
+            this.freqTextBox = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            this.tabPage3.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.tabPage3.SuspendLayout();
+            this.groupBox2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -68,11 +72,8 @@
             // 
             // tabPage1
             // 
+            this.tabPage1.Controls.Add(this.groupBox2);
             this.tabPage1.Controls.Add(this.CLOSEAPP);
-            this.tabPage1.Controls.Add(this.textBox1);
-            this.tabPage1.Controls.Add(this.label1);
-            this.tabPage1.Controls.Add(this.progressBar2);
-            this.tabPage1.Controls.Add(this.progressBar1);
             this.tabPage1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
@@ -94,38 +95,6 @@
             this.CLOSEAPP.UseVisualStyleBackColor = false;
             this.CLOSEAPP.Click += new System.EventHandler(this.CLOSEAPP_Click);
             // 
-            // textBox1
-            // 
-            this.textBox1.Location = new System.Drawing.Point(398, 240);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(169, 20);
-            this.textBox1.TabIndex = 3;
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(434, 223);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(102, 13);
-            this.label1.TabIndex = 2;
-            this.label1.Text = "Wartość wychylenia";
-            // 
-            // progressBar2
-            // 
-            this.progressBar2.Location = new System.Drawing.Point(338, 197);
-            this.progressBar2.Name = "progressBar2";
-            this.progressBar2.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
-            this.progressBar2.RightToLeftLayout = true;
-            this.progressBar2.Size = new System.Drawing.Size(145, 23);
-            this.progressBar2.TabIndex = 1;
-            // 
-            // progressBar1
-            // 
-            this.progressBar1.Location = new System.Drawing.Point(482, 197);
-            this.progressBar1.Name = "progressBar1";
-            this.progressBar1.Size = new System.Drawing.Size(145, 23);
-            this.progressBar1.TabIndex = 0;
-            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.groupBox1);
@@ -137,38 +106,6 @@
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Aktywne połączenia";
             this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // tabPage3
-            // 
-            this.tabPage3.Controls.Add(this.Log);
-            this.tabPage3.Cursor = System.Windows.Forms.Cursors.No;
-            this.tabPage3.Location = new System.Drawing.Point(4, 22);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage3.Size = new System.Drawing.Size(946, 580);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "Log";
-            this.tabPage3.UseVisualStyleBackColor = true;
-            // 
-            // Log
-            // 
-            this.Log.BackColor = System.Drawing.SystemColors.HotTrack;
-            this.Log.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.Log.ForeColor = System.Drawing.SystemColors.MenuBar;
-            this.Log.Location = new System.Drawing.Point(6, 6);
-            this.Log.Name = "Log";
-            this.Log.ReadOnly = true;
-            this.Log.Size = new System.Drawing.Size(934, 568);
-            this.Log.TabIndex = 0;
-            this.Log.Text = "Metronomy log";
-            // 
-            // splitter1
-            // 
-            this.splitter1.Location = new System.Drawing.Point(0, 0);
-            this.splitter1.Name = "splitter1";
-            this.splitter1.Size = new System.Drawing.Size(8, 630);
-            this.splitter1.TabIndex = 1;
-            this.splitter1.TabStop = false;
             // 
             // groupBox1
             // 
@@ -261,6 +198,103 @@
             this.textBoxIP3.Size = new System.Drawing.Size(223, 20);
             this.textBoxIP3.TabIndex = 13;
             // 
+            // tabPage3
+            // 
+            this.tabPage3.Controls.Add(this.Log);
+            this.tabPage3.Cursor = System.Windows.Forms.Cursors.No;
+            this.tabPage3.Location = new System.Drawing.Point(4, 22);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage3.Size = new System.Drawing.Size(946, 580);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "Log";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // Log
+            // 
+            this.Log.BackColor = System.Drawing.SystemColors.HotTrack;
+            this.Log.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.Log.ForeColor = System.Drawing.SystemColors.MenuBar;
+            this.Log.Location = new System.Drawing.Point(6, 6);
+            this.Log.Name = "Log";
+            this.Log.ReadOnly = true;
+            this.Log.Size = new System.Drawing.Size(934, 568);
+            this.Log.TabIndex = 0;
+            this.Log.Text = "Metronomy log";
+            // 
+            // splitter1
+            // 
+            this.splitter1.Location = new System.Drawing.Point(0, 0);
+            this.splitter1.Name = "splitter1";
+            this.splitter1.Size = new System.Drawing.Size(8, 630);
+            this.splitter1.TabIndex = 1;
+            this.splitter1.TabStop = false;
+            // 
+            // groupBox2
+            // 
+            this.groupBox2.BackColor = System.Drawing.Color.LightBlue;
+            this.groupBox2.Controls.Add(this.freqTextBox);
+            this.groupBox2.Controls.Add(this.label2);
+            this.groupBox2.Controls.Add(this.textBox1);
+            this.groupBox2.Controls.Add(this.label1);
+            this.groupBox2.Controls.Add(this.progressBar2);
+            this.groupBox2.Controls.Add(this.progressBar1);
+            this.groupBox2.Location = new System.Drawing.Point(6, 6);
+            this.groupBox2.Name = "groupBox2";
+            this.groupBox2.Size = new System.Drawing.Size(415, 213);
+            this.groupBox2.TabIndex = 5;
+            this.groupBox2.TabStop = false;
+            this.groupBox2.Text = "Parametry oscylacji";
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(114, 52);
+            this.textBox1.Name = "textBox1";
+            this.textBox1.Size = new System.Drawing.Size(169, 20);
+            this.textBox1.TabIndex = 7;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 55);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(102, 13);
+            this.label1.TabIndex = 6;
+            this.label1.Text = "Wartość wychylenia";
+            // 
+            // progressBar2
+            // 
+            this.progressBar2.Location = new System.Drawing.Point(59, 126);
+            this.progressBar2.Name = "progressBar2";
+            this.progressBar2.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.progressBar2.RightToLeftLayout = true;
+            this.progressBar2.Size = new System.Drawing.Size(145, 23);
+            this.progressBar2.TabIndex = 5;
+            this.progressBar2.Click += new System.EventHandler(this.progressBar2_Click);
+            // 
+            // progressBar1
+            // 
+            this.progressBar1.Location = new System.Drawing.Point(210, 126);
+            this.progressBar1.Name = "progressBar1";
+            this.progressBar1.Size = new System.Drawing.Size(145, 23);
+            this.progressBar1.TabIndex = 4;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 81);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(71, 13);
+            this.label2.TabIndex = 8;
+            this.label2.Text = "Częstotliwość";
+            // 
+            // freqTextBox
+            // 
+            this.freqTextBox.Location = new System.Drawing.Point(114, 78);
+            this.freqTextBox.Name = "freqTextBox";
+            this.freqTextBox.Size = new System.Drawing.Size(169, 20);
+            this.freqTextBox.TabIndex = 9;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -273,12 +307,13 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
-            this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
-            this.tabPage3.ResumeLayout(false);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.groupBox2.ResumeLayout(false);
+            this.groupBox2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -290,10 +325,6 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TabPage tabPage3;
         private System.Windows.Forms.Splitter splitter1;
-        public System.Windows.Forms.ProgressBar progressBar2;
-        public System.Windows.Forms.ProgressBar progressBar1;
-        private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label1;
         public System.Windows.Forms.RichTextBox Log;
         private System.Windows.Forms.Button CLOSEAPP;
         private System.Windows.Forms.GroupBox groupBox1;
@@ -305,5 +336,12 @@
         private System.Windows.Forms.TextBox textBoxIP2;
         private System.Windows.Forms.CheckBox checkBox2;
         private System.Windows.Forms.TextBox textBoxIP3;
+        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label label1;
+        public System.Windows.Forms.ProgressBar progressBar2;
+        public System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.TextBox freqTextBox;
+        private System.Windows.Forms.Label label2;
     }
 }
