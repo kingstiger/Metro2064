@@ -33,11 +33,7 @@ namespace MetronomySimul
             progressBar2.Maximum = 1000;
             metronome = new Metronome(this);
         }
-
-        public void TrySendOscillationInformation()
-        {
-            watchdog.TrySendOscillationInformation();
-        }
+        
 
         private void Form1_Load(object sender, EventArgs e)
         {
