@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 
 namespace MetronomySimul
 {
-    //TODO -> deoffer
-    //TODO -> offered To
+    //TODO -> deoffer -> DONE
+    //TODO -> offered To -> CHYBA DONE
     //TODO -> porty dobre w ack
     
     class Watchdog
@@ -24,7 +24,7 @@ namespace MetronomySimul
         private IPEndPoint multicastReceivingEndpoint;
         //Uchwyty na wątki do wysyłania i odbierania danych, oraz cyklicznego dodawania danych do wysłania przez watchdoga
 
-        public Watchdog(string localAddress, int numberOfInterfaces, Form1 form)
+        public Watchdog(string localAddress, int localPort, int numberOfInterfaces, Form1 form)
         {
             this.form = form;
 
@@ -33,14 +33,14 @@ namespace MetronomySimul
             interfaceMutex = new Mutex();
             packetsToSend = new Queue<NetPacket>();
             packetsReceived = new Queue<NetPacket>();
-            multicastReceivingEndpoint = new IPEndPoint(IPAddress.Any, 8080);
+            multicastReceivingEndpoint = new IPEndPoint(IPAddress.Any, localPort);
 
-            localEndPoint = new IPEndPoint(IPAddress.Parse(localAddress), 8080);
+            localEndPoint = new IPEndPoint(IPAddress.Parse(localAddress), localPort);
             netClient = new UdpClient(localEndPoint);
             netClient.Client.EnableBroadcast = true;
             for (int i = 1; i <= numberOfInterfaces; ++i) //Inicjalizacja interfejsów siecowych
             {
-                interfaces.Add(new WNetInterface(localAddress, i, form)); //Tworzy nowy interfejs sieciowy i przypisuje mu numer
+                interfaces.Add(new WNetInterface(localAddress, localPort, i, form)); //Tworzy nowy interfejs sieciowy i przypisuje mu numer
             }
             cyclicThread = new Thread(CyclicThread);
             listenerThread = new Thread(ListenerThread);
@@ -154,11 +154,15 @@ namespace MetronomySimul
                 {
                     foreach (WNetInterface wNetInterface in interfaces)
                     {
-                        if (wNetInterface.IsAvaiable() && !wNetInterface.isOffered)
+                        if (wNetInterface.IsAvaiable() && wNetInterface.offeredTo.Address.ToString().Equals(toProcess.sender_IP.ToString()))
                         {
                             wNetInterface.SetConnection(new IPEndPoint(toProcess.sender_IP, toProcess.sender_port));
                             AddAwaitingToSendPacket(MakeAckPacket(toProcess));
                             goto End;
+                        }
+                        else
+                        {
+                            //Wyślij NACK albo nie rób nic
                         }
                     }
                 }
@@ -231,6 +235,7 @@ namespace MetronomySimul
                                     
             while(true)
             {
+                TryDeoffer();
                 TryPing();
                 TrySendOscillationInformation();
                 DiscoverIfAlone();
@@ -254,8 +259,6 @@ namespace MetronomySimul
                         if (wNetInterface.DoTerminate())
                         {
                             wNetInterface.TerminateConnection();
-                            wNetInterface.ResetPingCount();
-                            wNetInterface.ZeroPing();
                             hasAnyoneBeenPinged = true;
                         }
                         else
@@ -267,6 +270,23 @@ namespace MetronomySimul
                 }
             }
             return hasAnyoneBeenPinged;
+        }
+
+        /// <summary>
+        /// Próba zakończenia okresu ważności wysłanych ofert
+        /// </summary>
+        private void TryDeoffer()
+        {
+            foreach (WNetInterface wNetInterface in interfaces)
+            {
+                if(wNetInterface.isOffered)
+                {
+                    if(wNetInterface.DecrementOfferTime())
+                    {
+                        StopOfferingInterface(wNetInterface);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -319,6 +339,8 @@ namespace MetronomySimul
         public void OfferInterface(WNetInterface wNet, IPEndPoint targetEndpoint)
         {
             wNet.isOffered = true;
+            wNet.offeredTo = targetEndpoint;
+            wNet.SetOfferTimeout();
             wNet.ZeroPing();
             AddAwaitingToSendPacket(MakeOfferPacket(wNet, targetEndpoint));
             form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " offered. Awaiting ACK...");
@@ -331,6 +353,8 @@ namespace MetronomySimul
         public void StopOfferingInterface(WNetInterface wNet)
         {
             wNet.isOffered = false;
+            wNet.offeredTo = null;
+            wNet.ZeroOfferTime();
             wNet.ZeroPing();
             this.form.DisplayOnLog("WATCHDOG>#\tInterface " + wNet.eth.GetInterfaceNumber() + " is no longer offered");
         }

@@ -18,16 +18,20 @@ namespace MetronomySimul
     {
         public NetInterface eth;   //Interfejs sieciowy
         public bool isOffered;     //Flaga oznaczająca, czy interfejs został zaoferowany, ale jeszcze nie utworzono z nim połączenia
+        public IPEndPoint offeredTo;
         private int secondsElapsedLastPing;
+        private int offerTimeLeft;
         private Form1 form;        //Uchwyt na okno
         private int triedPings;
 
-        public WNetInterface(string localAddress, int interfaceNumber, Form1 form)
+        public WNetInterface(string localAddress, int localPort, int interfaceNumber, Form1 form)
         {
             this.form = form;
-            eth = new NetInterface(localAddress, interfaceNumber, form);
+            eth = new NetInterface(localAddress, localPort, interfaceNumber, form);
             isOffered = false;
-            ZeroPing();    //Dopiero po nawiązaniu połączenia i wysłaniu pierwszego pinga uzupełniamy o pole o wartość większą od zera.
+            offeredTo = null;
+            ZeroOfferTime();
+            ZeroPing();
         }
 
         //Nawiązywanie/przerywanie połączeń i przesyłanie danych oscylacji=========================
@@ -42,6 +46,7 @@ namespace MetronomySimul
         {
             isOffered = false;
             ZeroPing();
+            ResetPingCount();
             eth.SetConnection(targetEndPoint);
         }
 
@@ -51,6 +56,8 @@ namespace MetronomySimul
         public void TerminateConnection()
         {
             isOffered = false;
+            offeredTo = null;
+            ResetPingCount();
             ZeroPing();
             eth.TerminateConnection();
         }
@@ -63,12 +70,18 @@ namespace MetronomySimul
         //=========================================================================================
 
 
-        //Metody od sprawdzania pingu==============================================================
+        //Metody od sprawdzania pingu i oferowania interfejsu======================================
         /// <summary>
         /// Zwięsza licznik sekund od ostatniego pinga o 1. Jeżeli czas od ostatniego pinga przekroczy 10 sekund metoda zwraca wartość logiczną false
         /// </summary>
         /// <returns></returns>
         public bool IncrementLastPing() => (++secondsElapsedLastPing >= 10) ? true : false;
+
+        /// <summary>
+        /// Zmniejsza licznik pozostałego czasu oferty
+        /// </summary>
+        /// <returns></returns>
+        public bool DecrementOfferTime() => (--offerTimeLeft <= 0) ? true : false;
         
         /// <summary>
         /// Stwierdza, czy trzeba kończyć połączenie (po 3 pingach bez odpowiedzi)
@@ -85,6 +98,16 @@ namespace MetronomySimul
         /// Zeruje licznik sekund od ostatniego pingu
         /// </summary>
         public void ZeroPing() => secondsElapsedLastPing = 0;
+
+        /// <summary>
+        /// Ustawia timeout ofertowania interfejsu po jej wysłaniu
+        /// </summary>
+        public void SetOfferTimeout() => offerTimeLeft = 5;
+
+        /// <summary>
+        /// Zeruje licznik czasu ważności oferty
+        /// </summary>
+        public void ZeroOfferTime() => offerTimeLeft = 0;
         //=========================================================================================
 
 

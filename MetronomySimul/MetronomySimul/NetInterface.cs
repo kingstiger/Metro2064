@@ -31,7 +31,7 @@ namespace MetronomySimul
         /// <param name="localAddress">Lokalny adres IP karty sieciowej</param>
         /// <param name="interfaceNumber">Na podstawie numeru interfejsu zostaje przypisany mu nr portu</param>
         /// <param name="form">Uchwyt na okno w celu wyświetlania logu</param>
-		public NetInterface(string localAddress, int interfaceNumber, Form1 form)
+		public NetInterface(string localAddress, int localPort, int interfaceNumber, Form1 form)
 		{
             this.form = form;
             seq_number = 0;
@@ -42,7 +42,7 @@ namespace MetronomySimul
 			packetsReceived = new Queue<NetPacket>();
             this.interfaceNumber = interfaceNumber;
             
-			localEndPoint = new IPEndPoint(IPAddress.Parse(localAddress), 8080 + interfaceNumber); //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
+			localEndPoint = new IPEndPoint(IPAddress.Parse(localAddress), localPort + interfaceNumber); //Lokalny endpoint otrzyma adres karty sieciowej i wolny numer portu
 			netClient = new UdpClient(localEndPoint);	//Inicjalizacja klienta protokołu UDP
 		}
 
